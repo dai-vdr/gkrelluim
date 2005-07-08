@@ -3,21 +3,22 @@
 
 AC_PREREQ(2.59)
 
-AC_INIT([gkrelluim], 0.0.2, [dai@kip.iis.toyama-u.ac.jp])
+AC_INIT([gkrelluim], 0.0.3, [d+gkrelluim@vdr.jp])
 AM_INIT_AUTOMAKE($PACKAGE_NAME, $PACKAGE_VERSION, no-define)
 
-AC_CONFIG_SRCDIR([gkrelluim.c])
+AC_CONFIG_SRCDIR([src/gkrelluim.c])
 
 # Checks for programs.
 AC_PROG_CC
 
 # pkg-config
-PKG_CHECK_MODULES(UIM, uim >= 0.4.3)
+PKG_CHECK_MODULES(UIM, uim >= 0.4.6)
 AC_SUBST(UIM_CFLAGS)
 AC_SUBST(UIM_LIBS)
 #
-PKG_CHECK_MODULES(GKRELLM, gkrellm >= 2.2.2)
+PKG_CHECK_MODULES(GKRELLM, gkrellm >= 2.2.4)
 AC_SUBST(GKRELLM_CFLAGS)
 AC_SUBST(GKRELLM_LIBS)
 
-AC_OUTPUT(Makefile)
+AC_OUTPUT([Makefile
+           src/Makefile])

@@ -1,18 +1,27 @@
-2004-10-20 dai@kip <dai@kip.iis.toyama-u.ac.jp>
+2005-02-27 dai <d+gkrelluim@vdr.jp>
+
+	* Release 0.0.3
+	* remove launch button
+	* add launch menu
+	* apply gkrelluim-0.0.2-status_text.diff (by Konosuke Watanabe, thx!)
+	* parts taken from toolbar-common-gtk.c (0.4.6beta2),
+	  replace parts taken from old helper-toolbar-common-gtk.c
+
+2004-10-20 dai <d+gkrelluim@vdr.jp>
 
 	* Release 0.0.2
 	* add launch button uim-im-switcher
 
-2004-09-23 dai@kip <dai@kip.iis.toyama-u.ac.jp>
+2004-09-23 dai <d+gkrelluim@vdr.jp>
 
 	* Release 0.0.1
 	* autoconficate
 
-2004-09-11 dai@kip <dai@kip.iis.toyama-u.ac.jp>
+2004-09-11 dai <d+gkrelluim@vdr.jp>
 
 	* Release 0.0.0 (20040911.1)
 	* s/strdup/g_strdup/
 
-2004-09-10 dai@kip <dai@kip.iis.toyama-u.ac.jp>
+2004-09-10 dai <d+gkrelluim@vdr.jp>
 
 	* Release 0.0.0 (20040910.1)
