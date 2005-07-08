@@ -3,7 +3,7 @@
 
 AC_PREREQ(2.59)
 
-AC_INIT([gkrelluim], 0.0.1, [dai@kip.iis.toyama-u.ac.jp])
+AC_INIT([gkrelluim], 0.0.2, [dai@kip.iis.toyama-u.ac.jp])
 AM_INIT_AUTOMAKE($PACKAGE_NAME, $PACKAGE_VERSION, no-define)
 
 AC_CONFIG_SRCDIR([gkrelluim.c])

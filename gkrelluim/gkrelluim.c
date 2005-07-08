@@ -1,5 +1,5 @@
 /*
- * GKrellUIM 0.0.1 (20040923)
+ * GKrellUIM 0.0.2 (20041020)
  *
  * dai@kip <dai@kip.iis.toyama-u.ac.jp>
  */
@@ -20,7 +20,33 @@ static int read_tag;
 static int uim_fd;
 
 // GKrellUIM
+#define CONFIG_KEYWORD "gkrelluim"
 static gchar *status_text = "?";
+static GtkWidget *exec_entry;
+gchar *imswitcher_exec_command;
+
+/*
+ * taken from gkrellm2-demos/demo3.c and gkrellmms/options.c,
+ * modified for GKrellUIM
+ */
+static void
+cb_button( GkrellmDecalbutton *button ) {
+  gchar  **argv = 0;
+  GError  *err  = NULL;
+  gboolean res;
+
+  if( !g_shell_parse_argv( imswitcher_exec_command, NULL, &argv, &err ) ) {
+    gkrellm_message_window( "GKrellUIM Error", err->message, NULL );
+    g_error_free( err );
+  } else {
+    res = g_spawn_async( NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
+                         NULL, NULL, NULL, &err );
+    if( !res && err ) {
+      gkrellm_message_window( "GKrellUIM Error", err->message, NULL );
+      g_error_free( err );
+    }
+  }
+}
 
 /*
  * taken from helper-toolbar-common-gtk.c, modified for GKrellUIM
@@ -224,7 +250,7 @@ static gint panel_expose_event( GtkWidget *widget, GdkEventExpose *ev ) {
 /*
  * taken from gkrellm2-demos/demo2.c, modified for GKrellUIM
  */
-static void update_plugin() {
+static void update_gkrelluim() {
   gchar *label = NULL;
 
   label = g_strdup_printf( "UIM: %s", status_text );
@@ -237,11 +263,15 @@ static void update_plugin() {
 }
 
 /*
- * taken from gkrellm2-demos/demo2.c, modified for GKrellUIM
+ * taken from gkrellm2-demos/demo[23].c, modified for GKrellUIM
  */
-static void create_plugin( GtkWidget *vbox, gint first_create ) {
+static void create_gkrelluim( GtkWidget *vbox, gint first_create ) {
   GkrellmStyle     *style;
   GkrellmTextstyle *text_style;
+
+  // GKrellUIM
+  GkrellmDecalbutton *button;
+  gint               x;
 
   if( first_create ) {
     panel = gkrellm_panel_new0();
@@ -253,6 +283,21 @@ static void create_plugin( GtkWidget *vbox, gint first_create ) {
   text_style = gkrellm_meter_textstyle( style_id );
   decal = gkrellm_create_decal_text( panel, "Aq", text_style, style,
                                      -1, -1, -1);
+  x = decal->x + decal->w;
+  button = gkrellm_make_scaled_button( panel,
+	NULL,		/* GkrellmPiximage image		*/
+	cb_button,	/* Button clicked callback function	*/
+	NULL,		/* Arg to callback function		*/
+	FALSE,		/* auto_hide				*/
+	FALSE,		/* set_default_border			*/
+	0,		/* Image depth				*/
+	0,		/* Initial out frame			*/
+	0,		/* Pressed frame			*/
+	x - 13 - 2,	/* x position of button			*/
+	2 + 2,		/* y position of button			*/
+	13,		/* Width for scaling the button		*/
+	15 );		/* Height for scaling the button	*/
+
   gkrellm_panel_configure( panel, NULL, style );
 
   gkrellm_panel_create( vbox, monitor, panel );
@@ -270,17 +315,72 @@ static void create_plugin( GtkWidget *vbox, gint first_create ) {
 }
 
 /*
- * taken from alltraxclock.c, modified for GKrellUIM
+ * taken from gkrellmms/options.c, modified for GKrellUIM
  */
-static void create_plugin_tab( GtkWidget *tab_vbox ) {
-  GtkWidget *tabs, *text;
-  GtkWidget *vbox;
+void apply_gkrelluim_config() {
+  g_free( imswitcher_exec_command );
+  imswitcher_exec_command = g_strdup( gtk_entry_get_text( GTK_ENTRY( exec_entry ) ) );
+}
+
+/*
+ * taken from gkrellmms/options.c, modified for GKrellUIM
+ */
+void save_gkrelluim_config( FILE *f ) {
+  fprintf( f, "%s imswitcher_exec_command %s\n", CONFIG_KEYWORD, imswitcher_exec_command );
+}
+
+/*
+ * taken from gkrellmms/options.c, modified for GKrellUIM
+ */
+void load_gkrelluim_config( gchar *arg ) {
+  gchar config[ 64 ], item[ 256 ], command[ 64 ];
+  gint  n;
+
+  n = sscanf( arg, "%s %[^\n]", config, item );
+
+  if( n == 2 ) {
+    if( strcmp( config, "imswitcher_exec_command" ) == 0 ) {
+      imswitcher_exec_command = g_strdup( item );
+    }
+  }
+}
+
+/*
+ * taken from alltraxclock.c and gkrellmms/options,
+ * modified for GKrellUIM
+ */
+static void create_gkrelluim_tab( GtkWidget *tab_vbox ) {
+  GtkWidget *tabs,  *text;
+  GtkWidget *vbox,  *vbox1;
+
+  GtkWidget *frame, *hbox;
+
+  GtkWidget *label;
   gchar     *plugin_about_text;
 
   tabs = gtk_notebook_new();
   gtk_notebook_set_tab_pos( GTK_NOTEBOOK( tabs ), GTK_POS_TOP );
   gtk_box_pack_start( GTK_BOX( tab_vbox ), tabs, TRUE, TRUE, 0 );
 
+  // Config tab
+  frame = gtk_frame_new( NULL );
+  gtk_container_border_width( GTK_CONTAINER( frame ), 3 );
+
+  hbox = gtk_hbox_new( FALSE, 0 );
+
+  label = gtk_label_new( "im-switcher Executable:" );
+  gtk_box_pack_start( GTK_BOX( hbox ), label, FALSE,  FALSE, 0 );
+
+  exec_entry = gtk_entry_new_with_max_length( 255 );
+  gtk_entry_set_text( GTK_ENTRY( exec_entry ), imswitcher_exec_command );
+  gtk_entry_set_editable( GTK_ENTRY( exec_entry ), TRUE );
+  gtk_box_pack_start( GTK_BOX( hbox ), exec_entry, FALSE,  FALSE, 0 );
+
+  label = gtk_label_new( "Config" );
+  gtk_container_add( GTK_CONTAINER( frame ), hbox );
+  gtk_notebook_append_page( GTK_NOTEBOOK( tabs ), frame, label );
+
+  // About tab
   plugin_about_text = g_strdup(
 	"GKrellUIM "PACKAGE_VERSION"\n"
 	"GKrellM UIM helper Plugin\n\n"
@@ -289,10 +389,10 @@ static void create_plugin_tab( GtkWidget *tab_vbox ) {
 	"http://www.kip.iis.toyama-u.ac.jp/~dai/\n\n"
 	"Released under the GNU General Public License\n" );
 //	"GKrellUIM comes with ABSOLUTELY NO WARRANTY\n" );
-  vbox = gtk_label_new( "About" );
   text = gtk_label_new( plugin_about_text );
-  gtk_notebook_append_page( GTK_NOTEBOOK( tabs ), text, vbox );
   g_free( plugin_about_text );
+  label = gtk_label_new( "About" );
+  gtk_notebook_append_page( GTK_NOTEBOOK( tabs ), text, label );
 }
 
 /*
@@ -301,14 +401,16 @@ static void create_plugin_tab( GtkWidget *tab_vbox ) {
 static GkrellmMonitor plugin_gkrelluim = {
   "GKrellUIM",	/* Name, for config tab.	*/
   0,		/* ID, 0 if a plugin		*/
-  create_plugin,	/* The create_plugin() function */
-  update_plugin,	/* The update_plugin() function */
-  create_plugin_tab,	/* The create_plugin_tab() config function	*/
-  NULL,		/* The apply_plugin_config() function		*/
 
-  NULL,		/* The save_plugin_config() function	*/
-  NULL,		/* The load_plugin_config() function	*/
-  "gkrelluim",	/* config keyword			*/
+  create_gkrelluim,		/* The create_plugin() function */
+  update_gkrelluim,		/* The update_plugin() function */
+
+  create_gkrelluim_tab,		/* The create_plugin_tab() config function */
+  apply_gkrelluim_config,	/* The apply_plugin_config() function */
+
+  save_gkrelluim_config,	/* The save_plugin_config() function */
+  load_gkrelluim_config,	/* The load_plugin_config() function */
+  CONFIG_KEYWORD,		/* config keyword */
 
   NULL,		/* Undefined 2	*/
   NULL,		/* Undefined 1	*/
@@ -323,6 +425,8 @@ static GkrellmMonitor plugin_gkrelluim = {
  * gkrellm_init_plugin
  */
 GkrellmMonitor *gkrellm_init_plugin( void ) {
+  imswitcher_exec_command = g_strdup( "uim-im-switcher" );
+
   style_id = gkrellm_add_meter_style( &plugin_gkrelluim, "gkrelluim" );
   monitor = &plugin_gkrelluim;
 
