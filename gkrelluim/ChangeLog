@@ -1,3 +1,13 @@
+2005-06-27 dai <d+gkrelluim@vdr.jp>
+
+	* Release 0.0.4
+	* rename from configure.in to configure.ac
+	* add input label
+	* remove unused functions and variables
+	* fix typo my mail address
+	* remove GtkItemFactory
+	* split gkrelluim.c
+
 2005-02-27 dai <d+gkrelluim@vdr.jp>
 
 	* Release 0.0.3

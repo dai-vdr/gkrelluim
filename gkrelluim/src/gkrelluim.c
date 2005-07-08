@@ -1,41 +1,39 @@
 /*
- * GKrellUIM 0.0.3 (20050227)
+ * GKrellUIM 0.0.4 (20050627)
  *
  * dai <d+gkrelluim@vdr.jp>
  */
 
 /* GKrellM */
 #include <gkrellm2/gkrellm.h>
-
 static GkrellmMonitor *monitor;
 static GkrellmPanel *panel;
 static GkrellmDecal *decal;
 static gint style_id;
 
 /* UIM */
-#include <uim/uim.h>
-#include <uim/uim-helper.h>
-#define OBJECT_DATA_SIZE_GROUP "SIZE_GROUP"
-
-static unsigned int read_tag;
-static int uim_fd;
+extern int uim_fd;
 
 /* GKrellUIM */
 #define CONFIG_KEYWORD "gkrelluim"
-static gchar *status_text = "?";
 static GkrellmDecal *text_decal;
+static GkrellmDecal *mode_text_decal;
+static GkrellmDecal *input_text_decal;
+gchar *mode_text  = "?";
+gchar *input_text = "-";
+
 static GtkWidget *im_switcher_entry;
 static GtkWidget *pref_entry;
 static GtkWidget *dict_entry;
 static GtkWidget *input_pad_ja_entry;
 static GtkWidget *hand_entry;
 static GtkWidget *help_entry;
-gchar *im_switcher_exec;
-gchar *pref_exec;
-gchar *dict_exec;
-gchar *input_pad_ja_exec;
-gchar *hand_exec;
-gchar *help_exec;
+static gchar *im_switcher_exec;
+static gchar *pref_exec;
+static gchar *dict_exec;
+static gchar *input_pad_ja_exec;
+static gchar *hand_exec;
+static gchar *help_exec;
 enum {
   IM_SWITCHER_ID,
   PREF_ID,
@@ -46,214 +44,10 @@ enum {
 };
 
 /*
- * taken from toolbar-common-gtk.c (0.4.6beta2)
- */
-static gchar *
-get_charset(gchar *line)
-{
-  gchar **splitted = NULL;
-
-  splitted = g_strsplit(line, "=", 0);
-
-  if(splitted && splitted[0] && splitted[1]
-     && strcmp("charset", splitted[0]) == 0) {
-    gchar *charset = g_strdup(splitted[1]);
-    g_strfreev(splitted);
-    return charset;
-  } else {
-    g_strfreev(splitted);
-    return NULL;
-  }
-}
-
-/*
- * taken from toolbar-common-gtk.c (0.4.6beta2)
- */
-static gchar *
-convert_charset(const gchar *charset, const gchar *line)
-{
-  if(charset == NULL) {
-    return NULL;
-  }
-  return g_convert(line, strlen(line),
-                   "UTF-8", charset, 
-                   NULL, /* gsize *bytes_read */
-                   NULL, /*size *bytes_written */
-                   NULL); /* GError **error*/
-}
-
-/*
- * taken from toolbar-common-gtk.c (0.4.6beta2), modified for GKrellUIM
- */
-static void
-helper_toolbar_prop_list_update(GtkWidget *widget, gchar **tmp)
-{
-  int i = 0;
-  gchar **tmp2 = NULL;
-  gchar *charset = NULL;
-
-  charset = get_charset(tmp[1]);
-
-  /* XXX: remove menu_buttons */
-
-  while(tmp[i] && strcmp("", tmp[i]) != 0) {
-    gchar *utf8_str;
-    utf8_str = convert_charset(charset, tmp[i]);
-
-    if(utf8_str != NULL) {
-      tmp2 = g_strsplit(utf8_str, "\t", 0);
-      g_free(utf8_str);
-    } else {
-      tmp2 = g_strsplit(tmp[i], "\t", 0);
-    }
-
-    if(tmp2 && tmp2[0])
-    {
-      if(strcmp("branch", tmp2[0]) == 0) {
-        /* XXX: remove menu_buttons */
-        /* GKrellUIM */
-        if( i == 2 ) {
-          status_text = g_strdup( tmp2[1] );
-        }
-      } /* else if(strcmp("leaf", tmp2[0]) == 0) {
-           XXX: remove menu_buttons
-      } */
-      g_strfreev(tmp2);
-    }
-    i++;
-  }
-
-  /* XXX: remove menu_buttons */
-
-  if(charset)
-    g_free(charset);
-}
-
-/*
- * taken from toolbar-common-gtk.c (0.4.6beta2)
- */
-static void
-helper_toolbar_prop_label_update(GtkWidget *widget, gchar **lines)
-{
-  unsigned int i = 0;
-  gchar **pair = NULL;
-  gchar *charset = NULL;
-
-  charset = get_charset(lines[1]);
-
-  while(lines[i] && strcmp("", lines[i]) != 0) {
-    i++;
-  }
-
-  /* XXX: remove menu_buttons */
-
-  i = 1; /* resetting temporary variable */
-
-  while(lines[i] && strcmp("", lines[i]) != 0) {
-
-    if (charset) {
-      gchar *utf8_str;
-      utf8_str = g_convert(lines[i], strlen(lines[i]),
-                           "UTF-8", charset,
-                           NULL, /* gsize *bytes_read */
-                           NULL, /*size *bytes_written */
-                           NULL); /* GError **error*/
-
-      pair = g_strsplit(utf8_str, "\t", 0);
-      g_free(utf8_str);
-    } else {
-      pair = g_strsplit(lines[i], "\t", 0);
-    }
-   
-    if(pair && pair[0] && pair[1])
-    {
-      /* XXX: remove menu_buttons */
-      /* GKrellUIM */
-      if( i - 2 > 0 ) {
-        ;
-      } else {
-        status_text = g_strdup( pair[0] );
-      }
-    }
-    g_strfreev(pair);
-    i++;
-  }
-
-  if(charset)
-    g_free(charset);
-}
-
-/*
- * taken from toolbar-common-gtk.c (0.4.6beta2)
- */
-static void
-helper_disconnect_cb(void)
-{
-  uim_fd = -1;
-  g_source_remove(read_tag);
-}
-
-/*
- * taken from toolbar-common-gtk.c (0.4.6beta2),
- */
-static void
-helper_toolbar_parse_helper_str(GtkWidget *widget, gchar *str)
-{
-  gchar **lines;
-  lines = g_strsplit(str, "\n", 0);
-
-  if(lines && lines[0]) {
-    if( strcmp("prop_list_update", lines[0]) == 0) {
-      helper_toolbar_prop_list_update(widget, lines);
-    } else if( strcmp("prop_label_update", lines[0]) == 0) {
-      helper_toolbar_prop_label_update(widget, lines);
-    }
-    g_strfreev(lines);
-  }
-}
-
-/*
- * taken from toolbar-common-gtk.c (0.4.6beta2), modified for GKrellUIM
- */
-static gboolean
-fd_read_cb(GIOChannel *channel, GIOCondition c, gpointer p)
-{
-  gchar *tmp;
-  int fd = g_io_channel_unix_get_fd(channel);
-  GtkWidget *widget = GTK_WIDGET(p);
-
-  uim_helper_read_proc(fd);
-
-  while ((tmp = uim_helper_get_message())) {
-    helper_toolbar_parse_helper_str(widget, tmp);
-    free(tmp); tmp = NULL;
-  }
-
-  return TRUE;
-}
-
-/*
- * taken from toolbar-common-gtk.c (0.4.6beta2)
- */
-static void
-check_helper_connection(GtkWidget *widget)
-{
-  if(uim_fd < 0) {
-    uim_fd = uim_helper_init_client_fd(helper_disconnect_cb);
-    if(uim_fd > 0) {
-      GIOChannel *channel;
-      channel = g_io_channel_unix_new(uim_fd);
-      read_tag = g_io_add_watch(channel, G_IO_IN | G_IO_HUP | G_IO_ERR,
-                                fd_read_cb, (gpointer)widget);
-      g_io_channel_unref(channel);
-    }
-  }
-}
-
-/*
  * taken from gkrellm2-demos/demo2.c
  */
-static gint panel_expose_event( GtkWidget *widget, GdkEventExpose *ev ) {
+static gint
+panel_expose_event( GtkWidget *widget, GdkEventExpose *ev ) {
   gdk_draw_pixmap( widget->window,
     widget->style->fg_gc[ GTK_WIDGET_STATE( widget ) ],
     panel->pixmap, ev->area.x, ev->area.y, ev->area.x, ev->area.y,
@@ -262,30 +56,37 @@ static gint panel_expose_event( GtkWidget *widget, GdkEventExpose *ev ) {
 }
 
 /*
- * taken from gkrellm2-demos/demo2.c, modified for GKrellUIM
+ * taken from gkrellm2-demos/demo2.c, gkrellmms/gkrellmms.c
+ * modified for GKrellUIM
  */
-static void update_gkrelluim() {
-  gchar *label = NULL;
+static void
+update_gkrelluim( void ) {
+  /* GKrellUIM */
+  gchar *mode_label  = NULL;
+  gchar *input_label = NULL;
 
-  label = g_strdup_printf( "UIM %s", status_text );
+  mode_label  = g_strdup_printf( "%s", mode_text  );
+  input_label = g_strdup_printf( "%s", input_text );
 
-  decal->x_off = 0;
-  gkrellm_draw_decal_text( panel, decal, label, -1 );
+  gkrellm_draw_decal_text( panel, mode_text_decal,  mode_label,  0 );
+  gkrellm_draw_decal_text( panel, input_text_decal, input_label, 0 );
 
   gkrellm_draw_panel_layers( panel );
 
-  g_free( label );
+  g_free( mode_label  );
+  g_free( input_label );
 }
 
 /*
  * taken from gkrellm2-demos/demo3.c and gkrellmms/options.c,
  * modified for GKrellUIM
  */
-static void exec_command( GtkWidget *w, gint data ) {
+static void
+exec_command( gint data ) {
   gchar  **argv = 0;
   GError  *err  = NULL;
   gboolean res;
-  gchar   *exec;
+  gchar   *exec = NULL;
 
   switch( data ) {
     case IM_SWITCHER_ID:
@@ -325,48 +126,59 @@ static void exec_command( GtkWidget *w, gint data ) {
 }
 
 /*
- * taken from ggtk+-2.0.x-tut/sec-itemfactoryexample.html,
- * modified for GKrellUIM
- */
-static GtkItemFactoryEntry menu_items[] = {
-  { "/im-switcher",  NULL, exec_command, IM_SWITCHER_ID,  NULL, NULL },
-  { "/pref",         NULL, exec_command, PREF_ID,         NULL, NULL },
-  { "/dict",         NULL, exec_command, DICT_ID,         NULL, NULL },
-  { "/input-pad-ja", NULL, exec_command, INPUT_PAD_JA_ID, NULL, NULL },
-  { "/hand",         NULL, exec_command, HAND_ID,         NULL, NULL },
-  { "/help",         NULL, exec_command, HELP_ID,         NULL, NULL },
-};
-static gint nmenu_items = sizeof( menu_items ) / sizeof( menu_items[0] );
-
-/*
- * taken from gtk+-2.0.x-tut/sec-itemfactoryexample.html,
- * modified for GKrellUIM
- */
-static GtkWidget *get_menubar_menu( GtkWidget *window ) {
-  GtkItemFactory *item_factory;
-  GtkAccelGroup  *accel_group;
-
-  accel_group  = gtk_accel_group_new();
-  item_factory = gtk_item_factory_new( GTK_TYPE_MENU_BAR, "<main>", accel_group 
-);
-  gtk_item_factory_create_items( item_factory, nmenu_items, menu_items, NULL );
-  gtk_window_add_accel_group( GTK_WINDOW( window ), accel_group );
-
-  return gtk_item_factory_get_widget( item_factory, "<main>" );
-}
-
-/*
- * taken from gkrellm2-demos/demo3.c and gkrellmms/options.c,
- * modified for GKrellUIM
+ * GKrellUIM (gtk+-2.0.x-tut/sec-manualmenuexample.html)
  */
 static void
-cb_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
-  GtkItemFactory *item_factory;
-  GtkWidget      *menu;
+cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
+  GtkWidget *menu;
+  GtkWidget *im_switcher_item;
+  GtkWidget *pref_item;
+  GtkWidget *dict_item;
+  GtkWidget *input_pad_ja_item;
+  GtkWidget *hand_item;
+  GtkWidget *help_item;
 
-  item_factory = gtk_item_factory_new( GTK_TYPE_MENU, "<main>", NULL );
-  gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, NULL);
-  menu = gtk_item_factory_get_widget (item_factory, "<main>");
+  menu = gtk_menu_new();
+
+  im_switcher_item  = gtk_menu_item_new_with_label( "im-switcher" );
+  pref_item         = gtk_menu_item_new_with_label( "pref" );
+  dict_item         = gtk_menu_item_new_with_label( "dict" );
+  input_pad_ja_item = gtk_menu_item_new_with_label( "input-pad-ja" );
+  hand_item         = gtk_menu_item_new_with_label( "hand" );
+  help_item         = gtk_menu_item_new_with_label( "help" );
+
+  gtk_menu_shell_append( GTK_MENU_SHELL( menu ), im_switcher_item );
+  gtk_menu_shell_append( GTK_MENU_SHELL( menu ), pref_item );
+  gtk_menu_shell_append( GTK_MENU_SHELL( menu ), dict_item );
+  gtk_menu_shell_append( GTK_MENU_SHELL( menu ), input_pad_ja_item );
+  gtk_menu_shell_append( GTK_MENU_SHELL( menu ), hand_item );
+  gtk_menu_shell_append( GTK_MENU_SHELL( menu ), help_item );
+
+  g_signal_connect_swapped( G_OBJECT( im_switcher_item ), "activate",
+                            G_CALLBACK( exec_command ),
+                            (gpointer)IM_SWITCHER_ID );
+  g_signal_connect_swapped( G_OBJECT( pref_item ), "activate",
+                            G_CALLBACK( exec_command ),
+                            (gpointer)PREF_ID );
+  g_signal_connect_swapped( G_OBJECT( dict_item ), "activate",
+                            G_CALLBACK( exec_command ),
+                            (gpointer)DICT_ID );
+  g_signal_connect_swapped( G_OBJECT( input_pad_ja_item ), "activate",
+                            G_CALLBACK( exec_command ),
+                            (gpointer)INPUT_PAD_JA_ID );
+  g_signal_connect_swapped( G_OBJECT( hand_item ), "activate",
+                            G_CALLBACK( exec_command ),
+                            (gpointer)HAND_ID );
+  g_signal_connect_swapped( G_OBJECT( help_item ), "activate",
+                            G_CALLBACK( exec_command ),
+                            (gpointer)HELP_ID );
+
+  gtk_widget_show( im_switcher_item );
+  gtk_widget_show( pref_item );
+  gtk_widget_show( dict_item );
+  gtk_widget_show( input_pad_ja_item );
+  gtk_widget_show( hand_item );
+  gtk_widget_show( help_item );
 
   gtk_menu_popup( GTK_MENU(menu), NULL, NULL,
                   NULL, NULL,
@@ -376,7 +188,8 @@ cb_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
 /*
  * taken from gkrellm2-demos/demo[234].c, modified for GKrellUIM
  */
-static void create_gkrelluim( GtkWidget *vbox, gint first_create ) {
+static void
+create_gkrelluim( GtkWidget *vbox, gint first_create ) {
   GkrellmStyle     *style;
   GkrellmTextstyle *text_style;
 
@@ -403,10 +216,24 @@ static void create_gkrelluim( GtkWidget *vbox, gint first_create ) {
 	5,
 	0);
 
+  /* GKrellUIM */
+  mode_text_decal = gkrellm_create_decal_text( panel, "Aq", text_style, style,
+	0 + 5,
+	5,
+	0 );
+  gkrellm_draw_decal_text( panel, mode_text_decal, mode_text, 0 );
+
+  /* GKrellUIM */
+  input_text_decal = gkrellm_create_decal_text( panel, "Aq", text_style, style,
+	20 + 5,
+	5,
+	0 );
+  gkrellm_draw_decal_text( panel, input_text_decal, input_text, 0 );
+
   x = decal->x + decal->w;
   button = gkrellm_make_scaled_button( panel,
 	NULL,		/* GkrellmPiximage image		*/
-	cb_button,	/* Button clicked callback function	*/
+	cb_menu_button,	/* Button clicked callback function	*/
 	button,		/* Arg to callback function		*/
 	FALSE,		/* auto_hide				*/
 	FALSE,		/* set_default_border			*/
@@ -437,7 +264,8 @@ static void create_gkrelluim( GtkWidget *vbox, gint first_create ) {
 /*
  * taken from gkrellmms/options.c, modified for GKrellUIM
  */
-void apply_gkrelluim_config() {
+static void
+apply_gkrelluim_config( void ) {
   g_free( im_switcher_exec );
   g_free( pref_exec );
   g_free( dict_exec );
@@ -455,7 +283,8 @@ void apply_gkrelluim_config() {
 /*
  * taken from gkrellmms/options.c, modified for GKrellUIM
  */
-void save_gkrelluim_config( FILE *f ) {
+static void
+save_gkrelluim_config( FILE *f ) {
   fprintf( f, "%s im_switcher_exec %s\n",  CONFIG_KEYWORD, im_switcher_exec );
   fprintf( f, "%s pref_exec %s\n",         CONFIG_KEYWORD, pref_exec );
   fprintf( f, "%s dict_exec %s\n",         CONFIG_KEYWORD, dict_exec );
@@ -467,8 +296,9 @@ void save_gkrelluim_config( FILE *f ) {
 /*
  * taken from gkrellmms/options.c, modified for GKrellUIM
  */
-void load_gkrelluim_config( gchar *arg ) {
-  gchar config[ 64 ], item[ 256 ]; /*, command[ 64 ]; */
+static void
+load_gkrelluim_config( gchar *arg ) {
+  gchar config[ 64 ], item[ 256 ];
   gint  n;
 
   n = sscanf( arg, "%s %[^\n]", config, item );
@@ -499,13 +329,12 @@ void load_gkrelluim_config( gchar *arg ) {
  * taken from alltraxclock.c and gkrellmms/options,
  * modified for GKrellUIM
  */
-static void create_gkrelluim_tab( GtkWidget *tab_vbox ) {
+static void
+create_gkrelluim_tab( GtkWidget *tab_vbox ) {
   GtkWidget *tabs, *text;
 
   GtkWidget *frame;
   GtkWidget *vbox, *hbox, *zbox;
-  GtkWidget *im_switcher_hbox,  *pref_hbox, *dict_hbox,
-            *input_pad_ja_hbox, *hand_hbox, *help_hbox;
 
   GtkWidget *label;
   gchar     *plugin_about_text;
