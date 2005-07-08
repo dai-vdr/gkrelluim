@@ -1,0 +1,13 @@
+2004-09-23 dai@kip <dai@kip.iis.toyama-u.ac.jp>
+
+	* Release 0.0.1
+	* autoconficate
+
+2004-09-11 dai@kip <dai@kip.iis.toyama-u.ac.jp>
+
+	* Release 0.0.0 (20040911.1)
+	* s/strdup/g_strdup/
+
+2004-09-10 dai@kip <dai@kip.iis.toyama-u.ac.jp>
+
+	* Release 0.0.0 (20040910.1)
