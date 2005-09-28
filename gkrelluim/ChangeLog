@@ -1,4 +1,4 @@
-2005-09-xx dai <d+gkrelluim@vdr.jp>
+2005-09-28 dai <d+gkrelluim@vdr.jp>
 
 	* Release 0.0.5
 	* gkrelluim.c, uim-helper.c
@@ -7,6 +7,8 @@
 	* gkrelluim.c
 	  - refer launch menu to ~/.uim.d/customs/custom-toolbar.scm
 	  - some cosmetic changes
+	* src/Makefile.am
+	  - s/CFLAGS/AM_CFLAGS/ s/LDFLAGS/AM_LDFLAGS/
 
 2005-06-27 dai <d+gkrelluim@vdr.jp>
 
