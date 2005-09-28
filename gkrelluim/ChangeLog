@@ -1,7 +1,12 @@
-2005-08-08 dai <d+gkrelluim@vdr.jp>
+2005-09-xx dai <d+gkrelluim@vdr.jp>
 
 	* Release 0.0.5
-	* clarify source licence
+	* gkrelluim.c, uim-helper.c
+	  - add license
+	  - include some header files
+	* gkrelluim.c
+	  - refer launch menu to ~/.uim.d/customs/custom-toolbar.scm
+	  - some cosmetic changes
 
 2005-06-27 dai <d+gkrelluim@vdr.jp>
 

@@ -1,18 +1,27 @@
 /*
-  uim-helper.c - part of uim for GKrellUIM 
+  GKrellUIM uim-helper 
 
-  Copyright (c) 2003-2005 uim Project http://uim.freedesktop.org/
-  Copyright (c) 2004-2005, dai <d+gkrelluim@vdr.jp>
+  Copyright (C) 2004-2005 dai <d+gkrelluim@vdr.jp>
   All rights reserved.
 
-  1. Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
-  2. Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
-  3. Neither the name of authors nor the names of its contributors
-     may be used to endorse or promote products derived from this software
-     without specific prior written permission.
+  Original Author: uim Project http://uim.freedesktop.org/
+  Modifier: dai <d+gkrelluim@vdr.jp>
+
+  Redistribution and use in source and binary forms, with or
+  without modification, are permitted provided that the
+  following conditions are met:
+
+  1. Redistributions of source code must retain the above
+     copyright notice, this list of conditions and the
+     following disclaimer.
+  2. Redistributions in binary form must reproduce the above
+     copyright notice, this list of conditions and the
+     following disclaimer in the documentation and/or other
+     materials provided with the distribution.
+  3. Neither the name of authors nor the names of its
+     contributors may be used to endorse or promote products
+     derived from this software without specific prior written
+     permission.
 
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
   CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -35,6 +44,8 @@
 /* UIM */
 #include <uim/uim.h>
 #include <uim/uim-helper.h>
+#include <string.h>
+#include <stdlib.h>
 #define OBJECT_DATA_SIZE_GROUP "SIZE_GROUP"
 static unsigned int read_tag;
 /* GKrellUIM: static */ int uim_fd;
