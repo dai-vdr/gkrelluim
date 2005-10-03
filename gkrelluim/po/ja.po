@@ -1,0 +1,74 @@
+# GKrellUIM: GKrellM UIM helper Plugin
+# Copyright (C) 2005 dai <d+gkrelluim@vdr.jp>
+# This file is distributed under the same license as the gkrelluim package.
+# dai <d+gkrelluim@vdr.jp>, 2005.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gkrelluim 0.0.6\n"
+"Report-Msgid-Bugs-To: d+gkrelluim@vdr.jp\n"
+"POT-Creation-Date: 2005-10-03 11:53+0900\n"
+"PO-Revision-Date: 2005-09-28 18:01+0900\n"
+"Last-Translator: dai <d+gkrelluim@vdr.jp>\n"
+"Language-Team: ja <ja@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=EUC-JP\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/gkrelluim.c:59
+msgid "im-switcher"
+msgstr "入力方式の切り替えツール"
+
+#: src/gkrelluim.c:65
+msgid "pref"
+msgstr "設定ツール"
+
+#: src/gkrelluim.c:71
+msgid "dict"
+msgstr "日本語辞書ツール"
+
+#: src/gkrelluim.c:77
+msgid "input-pad-ja"
+msgstr "入力パッド"
+
+#: src/gkrelluim.c:83
+msgid "hand"
+msgstr "手書き入力パッド"
+
+#: src/gkrelluim.c:89
+msgid "help"
+msgstr "ヘルプ"
+
+#: src/gkrelluim.c:346
+#, c-format
+msgid "%s Executable:"
+msgstr "%sの実行ファイル:"
+
+#: src/gkrelluim.c:365
+msgid "Config"
+msgstr "コンフィグ"
+
+#: src/gkrelluim.c:371
+#, c-format
+msgid ""
+"GKrellUIM %s\n"
+"GKrellM UIM helper Plugin\n"
+"\n"
+"Copyright (C) 2004-2005 dai\n"
+"d+gkrelluim@vdr.jp\n"
+"http://vdr.jp/d/gkrelluim.html\n"
+"\n"
+"Released under the GNU General Public License\n"
+msgstr ""
+"GKrellUIM %s\n"
+"GKrellM UIM ヘルパープラグイン\n"
+"\n"
+"Copyright (C) 2004-2005 dai\n"
+"d+gkrelluim@vdr.jp\n"
+"http://vdr.jp/d/gkrelluim.html\n"
+"\n"
+"GNU General Public License のもとにリリースされています\n"
+
+#: src/gkrelluim.c:379
+msgid "About"
+msgstr "GKrellUIM について"

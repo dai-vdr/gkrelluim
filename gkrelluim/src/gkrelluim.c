@@ -4,38 +4,30 @@
   Copyright (C) 2004-2005 dai <d+gkrelluim@vdr.jp>
   All rights reserved.
 
-  Redistribution and use in source and binary forms, with or
-  without modification, are permitted provided that the
-  following conditions are met:
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by 
+  the Free Software Foundation; either version 2 of the License, or 
+  (at your option) any later version.
 
-  1. Redistributions of source code must retain the above
-     copyright notice, this list of conditions and the
-     following disclaimer.
-  2. Redistributions in binary form must reproduce the above
-     copyright notice, this list of conditions and the
-     following disclaimer in the documentation and/or other
-     materials provided with the distribution.
-  3. Neither the name of authors nor the names of its
-     contributors may be used to endorse or promote products
-     derived from this software without specific prior written
-     permission.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
-  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
-  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 */
 
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
 /* GKrellM */
+#define PACKAGE        "gkrelluim"
+#define CONFIG_KEYWORD PACKAGE
+#define STYLE_NAME     PACKAGE
+
 #include <gkrellm2/gkrellm.h>
 static GkrellmMonitor *monitor;
 static GkrellmPanel   *panel;
@@ -50,7 +42,6 @@ void check_helper_connection( GtkWidget* );
 extern int uim_fd;
 
 /* GKrellUIM */
-#define CONFIG_KEYWORD "gkrelluim"
 static GkrellmDecal *text_decal;
 static GkrellmDecal *mode_text_decal;
 static GkrellmDecal *input_text_decal;
@@ -65,37 +56,37 @@ static struct _Command {
   const gchar *pref_button_show_symbol;
   uim_bool     show;
 } command[] = {
-  { "im-switcher",
+  { N_("im-switcher"),
     "im_switcher_exec",
     NULL,
     "uim-im-switcher-gtk",
     "toolbar-show-switcher-button?",
     UIM_TRUE },
-  { "pref",
+  { N_("pref"),
     "pref_exec",
     NULL,
     "uim-pref-gtk",
     "toolbar-show-pref-button?",
     UIM_TRUE },
-  { "dict",
+  { N_("dict"),
     "dict_exec",
     NULL,
     "uim-dict-gtk",
     "toolbar-show-dict-button?",
     UIM_FALSE },
-  { "input-pad-ja",
+  { N_("input-pad-ja"),
     "input_pad_ja_exec",
     NULL,
     "uim-input-pad-ja",
     "toolbar-show-input-pad-button?",
     UIM_FALSE },
-  { "hand",
+  { N_("hand"),
     "hand_exec",
     NULL,
     "uim-tomoe-ja",
     "toolbar-show-handwriting-input-pad-button?",
     UIM_FALSE },
-  { "help",
+  { N_("help"),
     "help_exec",
     NULL,
     "uim-help",
@@ -178,7 +169,7 @@ cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
   for( i = 0; i < COMMAND_LENGTH; i++ ) {
     if( uim_scm_symbol_value_bool( command[ i ].pref_button_show_symbol ) ) {
       show = TRUE;
-      item[ i ] = gtk_menu_item_new_with_label( command[ i ].desc );
+      item[ i ] = gtk_menu_item_new_with_label( _(command[ i ].desc) );
       gtk_menu_shell_append( GTK_MENU_SHELL( menu ), item[ i ] );
       g_signal_connect_swapped( G_OBJECT( item[ i ] ), "activate",
                                 G_CALLBACK( exec_command ),
@@ -352,7 +343,7 @@ create_gkrelluim_tab( GtkWidget *tab_vbox ) {
   /* label vbox */
   zbox = gtk_vbox_new( FALSE, 0 );
   for( i = 0; i < COMMAND_LENGTH; i++ ) {
-    label_text = g_strdup_printf( "%s Executable:", command[ i ].desc );
+    label_text = g_strdup_printf( _("%s Executable:"), _(command[ i ].desc) );
     label = gtk_label_new( label_text );
     g_free( label_text );
     gtk_box_pack_start( GTK_BOX( zbox ), label, TRUE, FALSE, 0 );
@@ -371,21 +362,21 @@ create_gkrelluim_tab( GtkWidget *tab_vbox ) {
 
   gtk_container_add( GTK_CONTAINER( vbox ), hbox );
 
-  label = gtk_label_new( "Config" );
+  label = gtk_label_new( _("Config") );
   gtk_container_add( GTK_CONTAINER( frame ), vbox );
   gtk_notebook_append_page( GTK_NOTEBOOK( tabs ), frame, label );
 
   /* About tab */
-  label_text = g_strdup(
-	"GKrellUIM "PACKAGE_VERSION"\n"
+  label_text = g_strdup_printf(
+	_("GKrellUIM %s\n"
 	"GKrellM UIM helper Plugin\n\n"
 	"Copyright (C) 2004-2005 dai\n"
 	"d+gkrelluim@vdr.jp\n"
 	"http://vdr.jp/d/gkrelluim.html\n\n"
-	"Released under the GNU General Public License\n" );
+	"Released under the GNU General Public License\n"), PACKAGE_VERSION );
   text = gtk_label_new( label_text );
   g_free( label_text );
-  label = gtk_label_new( "About" );
+  label = gtk_label_new( _("About") );
   gtk_notebook_append_page( GTK_NOTEBOOK( tabs ), text, label );
 }
 
@@ -419,7 +410,11 @@ static GkrellmMonitor plugin_gkrelluim = {
  * gkrellm_init_plugin
  */
 GkrellmMonitor *gkrellm_init_plugin( void ) {
-  style_id = gkrellm_add_meter_style( &plugin_gkrelluim, "gkrelluim" );
+#ifdef ENABLE_NLS
+  bind_textdomain_codeset( PACKAGE, "UTF-8" );
+#endif
+
+  style_id = gkrellm_add_meter_style( &plugin_gkrelluim, STYLE_NAME );
   monitor = &plugin_gkrelluim;
 
   return &plugin_gkrelluim;
