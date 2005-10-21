@@ -83,7 +83,7 @@ static struct _Command {
   { N_("hand"),
     "hand_exec",
     NULL,
-    "uim-tomoe-ja",
+    "uim-tomoe-gtk",
     "toolbar-show-handwriting-input-pad-button?",
     UIM_FALSE },
   { N_("help"),
@@ -197,7 +197,7 @@ create_gkrelluim( GtkWidget *vbox, gint first_create ) {
 
   /* GKrellUIM */
   GkrellmTextstyle   *text_style_alt;
-  GkrellmDecalbutton *button;
+  GkrellmDecalbutton *button /* = NULL */;
   gint                x;
 
   if( first_create ) {

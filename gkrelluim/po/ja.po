@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: gkrelluim 0.0.6\n"
 "Report-Msgid-Bugs-To: d+gkrelluim@vdr.jp\n"
 "POT-Creation-Date: 2005-10-03 11:53+0900\n"
-"PO-Revision-Date: 2005-09-28 18:01+0900\n"
+"PO-Revision-Date: 2005-10-11 17:49+0900\n"
 "Last-Translator: dai <d+gkrelluim@vdr.jp>\n"
 "Language-Team: ja <ja@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -17,7 +17,7 @@ msgstr ""
 
 #: src/gkrelluim.c:59
 msgid "im-switcher"
-msgstr "入力方式の切り替えツール"
+msgstr "入力方式の切り替え"
 
 #: src/gkrelluim.c:65
 msgid "pref"
