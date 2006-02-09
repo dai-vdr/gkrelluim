@@ -1,7 +1,7 @@
 /*
   GKrellUIM: GKrellM UIM helper Plugin
  
-  Copyright (C) 2004-2005 dai <d+gkrelluim@vdr.jp>
+  Copyright (C) 2004-2006 dai <d+gkrelluim@vdr.jp>
   All rights reserved.
 
   This program is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ static gint style_id;
 #include <uim/uim.h>            /* uim_bool */
 #include <uim/uim-helper.h>     /* uim_helper_client_get_prop_list */
 #include <uim/uim-compat-scm.h> /* uim_scm_symbol_value_bool */
-void check_helper_connection( GtkWidget* );
+void uim_toolbar_check_helper_connection( GtkWidget* );
 extern int uim_fd;
 
 /* GKrellUIM */
@@ -48,53 +48,61 @@ static GkrellmDecal *input_text_decal;
 gchar *mode_text  = "?";
 gchar *input_text = "-";
 
-static struct _Command {
+/*
+ * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ */
+/* FIXME! command menu and buttons should be customizable. */
+static struct _CommandEntry {
   const gchar *desc;
-  const gchar *config;
-  GtkWidget   *entry;
-  gchar       *exec;
-  const gchar *pref_button_show_symbol;
-  uim_bool     show;
-} command[] = {
-  { N_("im-switcher"),
-    "im_switcher_exec",
-    NULL,
-    "uim-im-switcher-gtk",
-    "toolbar-show-switcher-button?",
-    UIM_TRUE },
-  { N_("pref"),
-    "pref_exec",
-    NULL,
-    "uim-pref-gtk",
-    "toolbar-show-pref-button?",
-    UIM_TRUE },
-  { N_("dict"),
-    "dict_exec",
-    NULL,
-    "uim-dict-gtk",
-    "toolbar-show-dict-button?",
-    UIM_FALSE },
-  { N_("input-pad-ja"),
-    "input_pad_ja_exec",
-    NULL,
-    "uim-input-pad-ja",
-    "toolbar-show-input-pad-button?",
-    UIM_FALSE },
-  { N_("hand"),
-    "hand_exec",
-    NULL,
-    "uim-tomoe-gtk",
-    "toolbar-show-handwriting-input-pad-button?",
-    UIM_FALSE },
-  { N_("help"),
-    "help_exec",
-    NULL,
-    "uim-help",
-    "toolbar-show-help-button?",
-    UIM_FALSE }
+  const gchar *label;
+  const gchar *icon;
+  const gchar *command;
+  const gchar *custom_button_show_symbol;
+  uim_bool show_button;
+} command_entry[] = {
+  {N_("Switch input method"),
+   NULL,
+   "switcher-icon",
+   "uim-im-switcher-gtk &",
+   "toolbar-show-switcher-button?",
+   UIM_FALSE},
+
+  {N_("Preference"),
+   NULL,
+   GTK_STOCK_PREFERENCES,
+   "uim-pref-gtk &",
+   "toolbar-show-pref-button?",
+   UIM_FALSE},
+
+  {N_("Japanese dictionary editor"),
+   "Dic",
+   NULL,
+   "uim-dict-gtk &",
+   "toolbar-show-dict-button?",
+   UIM_FALSE},
+
+  {N_("Input pad"),
+   "Pad",
+   NULL,
+   "uim-input-pad-ja &",
+   "toolbar-show-input-pad-button?",
+   UIM_FALSE},
+
+  {N_("Handwriting input pad"),
+   "Hand",
+   NULL,
+   "uim-tomoe-gtk &",
+   "toolbar-show-handwriting-input-pad-button?",
+   UIM_FALSE},
+
+  {N_("Help"),
+   NULL,
+   GTK_STOCK_HELP,
+   "uim-help &",
+   "toolbar-show-help-button?",
+   UIM_FALSE}
 };
-static const gint COMMAND_LENGTH
-  = sizeof( command ) / sizeof( struct _Command );
+static gint command_entry_len = sizeof(command_entry) / sizeof(struct _CommandEntry);
 
 /*
  * taken from gkrellm2-demos/demo2.c
@@ -140,7 +148,7 @@ exec_command( gint data ) {
   GError  *err  = NULL;
   gboolean res;
 
-  if( !g_shell_parse_argv( command[ data ].exec, NULL, &argv, &err ) ) {
+  if( !g_shell_parse_argv( command_entry[ data ].command, NULL, &argv, &err ) ) {
     gkrellm_message_window( "GKrellUIM Error", err->message, NULL );
     g_error_free( err );
   } else {
@@ -159,17 +167,17 @@ exec_command( gint data ) {
 static void
 cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
   GtkWidget *menu;
-  GtkWidget *item[ COMMAND_LENGTH ];
+  GtkWidget *item[ command_entry_len ];
   gint       i;
   gboolean   show = FALSE;
 
   menu = gtk_menu_new();
 
   uim_init();
-  for( i = 0; i < COMMAND_LENGTH; i++ ) {
-    if( uim_scm_symbol_value_bool( command[ i ].pref_button_show_symbol ) ) {
+  for( i = 0; i < command_entry_len; i++ ) {
+    if( uim_scm_symbol_value_bool( command_entry[ i ].custom_button_show_symbol ) ) {
       show = TRUE;
-      item[ i ] = gtk_menu_item_new_with_label( _(command[ i ].desc) );
+      item[ i ] = gtk_menu_item_new_with_label( _(command_entry[ i ].desc) );
       gtk_menu_shell_append( GTK_MENU_SHELL( menu ), item[ i ] );
       g_signal_connect_swapped( G_OBJECT( item[ i ] ), "activate",
                                 G_CALLBACK( exec_command ),
@@ -256,59 +264,10 @@ create_gkrelluim( GtkWidget *vbox, gint first_create ) {
   }
 
   if( first_create ) {
-    /* taken from toolbar-common-gtk.c (0.4.6beta2) */
+    /* taken from uim-svn3105/helper/toolbar-common-gtk.c:toolbar_new */
     uim_fd = -1;
-    check_helper_connection( vbox );
+    uim_toolbar_check_helper_connection( vbox );
     uim_helper_client_get_prop_list();
-  }
-}
-
-/*
- * taken from gkrellmms/options.c
- * modified for GKrellUIM
- */
-static void
-apply_gkrelluim_config( void ) {
-  gint i;
-
-  for( i = 0; i < COMMAND_LENGTH; i++ ) {
-    g_free( command[ i ].exec );
-    command[ i ].exec
-      = g_strdup( gtk_entry_get_text( GTK_ENTRY( command[ i ].entry ) ) );
-  }
-}
-
-/*
- * taken from gkrellmms/options.c
- * modified for GKrellUIM
- */
-static void
-save_gkrelluim_config( FILE *f ) {
-  gint i;
-
-  for( i = 0; i < COMMAND_LENGTH; i++ ) {
-    fprintf( f, "%s %s %s\n", CONFIG_KEYWORD, command[ i ].config,
-                command[ i ].exec );
-  }
-}
-
-/*
- * taken from gkrellmms/options.c
- * modified for GKrellUIM
- */
-static void
-load_gkrelluim_config( gchar *arg ) {
-  gchar config[ 64 ], item[ 256 ];
-  gint  n, i;
-
-  n = sscanf( arg, "%s %[^\n]", config, item );
-
-  if( n == 2 ) {
-    for( i = 0; i < COMMAND_LENGTH; i++ ) {
-      if( strcmp( config, command[ i ].config ) == 0 ) {
-        command[ i ].exec = g_strdup( item );
-      }
-    }
   }
 }
 
@@ -331,46 +290,11 @@ create_gkrelluim_tab( GtkWidget *tab_vbox ) {
   gtk_notebook_set_tab_pos( GTK_NOTEBOOK( tabs ), GTK_POS_TOP );
   gtk_box_pack_start( GTK_BOX( tab_vbox ), tabs, TRUE, TRUE, 0 );
 
-  /* Config tab */
-  frame = gtk_frame_new( NULL );
-  gtk_container_border_width( GTK_CONTAINER( frame ), 3 );
-
-  vbox = gtk_vbox_new( FALSE, 0 );
-  gtk_container_border_width( GTK_CONTAINER( vbox ), 3 );
-
-  hbox = gtk_hbox_new( FALSE, 5 );
-
-  /* label vbox */
-  zbox = gtk_vbox_new( FALSE, 0 );
-  for( i = 0; i < COMMAND_LENGTH; i++ ) {
-    label_text = g_strdup_printf( _("%s Executable:"), _(command[ i ].desc) );
-    label = gtk_label_new( label_text );
-    g_free( label_text );
-    gtk_box_pack_start( GTK_BOX( zbox ), label, TRUE, FALSE, 0 );
-  }
-  gtk_box_pack_start( GTK_BOX( hbox ), zbox, FALSE, FALSE, 0 );
-
-  /* entry vbox */
-  zbox = gtk_vbox_new( FALSE, 0 );
-  for( i = 0; i < COMMAND_LENGTH; i++ ) {
-    command[ i ].entry = gtk_entry_new_with_max_length( 255 );
-    gtk_entry_set_text( GTK_ENTRY( command[ i ].entry ), command[ i ].exec );
-    gtk_entry_set_editable( GTK_ENTRY( command[ i ].entry ), TRUE );
-    gtk_box_pack_start( GTK_BOX( zbox ), command[ i ].entry, TRUE, FALSE, 0 );
-  }
-  gtk_box_pack_start( GTK_BOX( hbox ), zbox, FALSE, FALSE, 0 );
-
-  gtk_container_add( GTK_CONTAINER( vbox ), hbox );
-
-  label = gtk_label_new( _("Config") );
-  gtk_container_add( GTK_CONTAINER( frame ), vbox );
-  gtk_notebook_append_page( GTK_NOTEBOOK( tabs ), frame, label );
-
   /* About tab */
   label_text = g_strdup_printf(
 	_("GKrellUIM %s\n"
 	"GKrellM UIM helper Plugin\n\n"
-	"Copyright (C) 2004-2005 dai\n"
+	"Copyright (C) 2004-2006 dai\n"
 	"d+gkrelluim@vdr.jp\n"
 	"http://vdr.jp/d/gkrelluim.html\n\n"
 	"Released under the GNU General Public License\n"), PACKAGE_VERSION );
@@ -387,15 +311,15 @@ static GkrellmMonitor plugin_gkrelluim = {
   "GKrellUIM",	/* Name, for config tab.	*/
   0,		/* ID, 0 if a plugin		*/
 
-  create_gkrelluim,		/* The create_plugin() function */
-  update_gkrelluim,		/* The update_plugin() function */
+  create_gkrelluim,	/* The create_plugin() function */
+  update_gkrelluim,	/* The update_plugin() function */
 
-  create_gkrelluim_tab,		/* The create_plugin_tab() config function */
-  apply_gkrelluim_config,	/* The apply_plugin_config() function */
+  create_gkrelluim_tab,	/* The create_plugin_tab() config function */
+  NULL, 		/* The apply_plugin_config() function */
 
-  save_gkrelluim_config,	/* The save_plugin_config() function */
-  load_gkrelluim_config,	/* The load_plugin_config() function */
-  CONFIG_KEYWORD,		/* config keyword */
+  NULL, 		/* The save_plugin_config() function */
+  NULL, 		/* The load_plugin_config() function */
+  CONFIG_KEYWORD,	/* config keyword */
 
   NULL,		/* Undefined 2	*/
   NULL,		/* Undefined 1	*/
