@@ -275,7 +275,6 @@ create_gkrelluim( GtkWidget *vbox, gint first_create ) {
   if( first_create ) {
     g_signal_connect( G_OBJECT( panel->drawing_area ), "expose_event",
                       G_CALLBACK( panel_expose_event ), NULL );
-
     im_menu_button_new( vbox, (GtkWidget*)(button) );
   }
 }
@@ -335,10 +334,6 @@ static GkrellmMonitor plugin_gkrelluim = {
   NULL		/* path if a plugin, filled in by GKrellM	*/
 };
 
-void gkrelluim_quit_plugin( void ) {
-  uim_quit();
-}
-
 /*
  * gkrellm_init_plugin
  */
@@ -346,12 +341,13 @@ GkrellmMonitor *gkrellm_init_plugin( void ) {
 #ifdef ENABLE_NLS
   bind_textdomain_codeset( PACKAGE, "UTF-8" );
 #endif
+
   uim_init();
 
   style_id = gkrellm_add_meter_style( &plugin_gkrelluim, STYLE_NAME );
   monitor = &plugin_gkrelluim;
 
-  g_atexit(gkrelluim_quit_plugin);
+  gkrellm_disable_plugin_connect(monitor, uim_quit);
 
   return &plugin_gkrelluim;
 }

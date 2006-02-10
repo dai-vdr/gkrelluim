@@ -468,6 +468,8 @@ void
 /* GkrellUIM: toolbar_new */
 im_menu_button_new(GtkWidget *vbox, GtkWidget *button)
 {
+  uim_init();
+
   g_object_set_data(G_OBJECT(vbox), OBJECT_DATA_IM_BUTTON, button);
 
   helper_toolbar_check_custom();
