@@ -1,5 +1,5 @@
 /*
-  GKrellUIM uim-helper 
+  GKrellUIM uim-helper
 
   Copyright (C) 2004-2006 dai <d+gkrelluim@vdr.jp>
   All rights reserved.
@@ -50,6 +50,7 @@
 #include <uim/uim-helper.h>
 #include <string.h>
 #include <stdlib.h>
+#define OBJECT_DATA_IM_BUTTON "IM_BUTTON"
 #define OBJECT_DATA_SIZE_GROUP "SIZE_GROUP"
 static unsigned int read_tag;
 /* GKrellUIM: static */ int uim_fd;
@@ -57,6 +58,93 @@ static unsigned int read_tag;
 /* GKrellUIM */
 extern gchar *mode_text;
 extern gchar *input_text;
+
+/*
+ * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ */
+static void
+im_menu_activate(GtkMenu *menu_item, gpointer data)
+{
+  GString *msg;
+
+  msg = g_string_new((gchar *)g_object_get_data(G_OBJECT(menu_item),
+                     "im_name"));
+  g_string_prepend(msg, "im_change_whole_desktop\n");
+  g_string_append(msg, "\n");
+  uim_helper_send_message(uim_fd, msg->str);
+  g_string_free(msg, TRUE);
+}
+
+/*
+ * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ * modified for GKrellUIM
+ */
+/* GKrellUIM: static */ void
+/* GKrellUIM: popup_im_menu */
+create_im_menu(GtkWidget *im_menu, GtkWidget *widget)
+{
+  GList *menu_item_list, *im_list, *state_list;
+  int i, selected = -1;
+
+  /* GKrellUIM */
+  uim_toolbar_check_helper_connection(widget);
+
+  menu_item_list = gtk_container_get_children(GTK_CONTAINER(im_menu));
+
+  /* GKrellUIM */
+  im_list = g_object_get_data(G_OBJECT(widget), "im_name");
+  state_list = g_object_get_data(G_OBJECT(widget), "im_state");
+
+  /* XXX: remove gtk_widget_destroy */
+
+  i = 0;
+  while (state_list) {
+    if (!strcmp("selected", state_list->data)) {
+      selected = i;
+      break;
+    }
+    state_list = state_list->next;
+    i++;
+  }
+
+  i = 0;
+  while (im_list) {
+    GtkWidget *menu_item;
+
+    if (selected != -1) {
+      menu_item = gtk_check_menu_item_new_with_label(im_list->data);
+#if GTK_CHECK_VERSION(2, 4, 0)
+      gtk_check_menu_item_set_draw_as_radio(GTK_CHECK_MENU_ITEM(menu_item),
+                                            TRUE);
+#endif
+      if (i == selected)
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item), TRUE);
+    } else {
+      menu_item = gtk_menu_item_new_with_label(im_list->data);
+    }
+
+    gtk_menu_shell_append(GTK_MENU_SHELL(im_menu), menu_item);
+
+    gtk_widget_show(menu_item);
+    g_signal_connect(G_OBJECT(menu_item), "activate",
+                     G_CALLBACK(im_menu_activate), im_menu);
+    g_object_set_data(G_OBJECT(menu_item), "im_name", im_list->data);
+    im_list = im_list->next;
+    i++;
+  }
+
+  /* XXX: remove gtk_menu_popup */
+}
+
+/*
+ * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ */
+static void
+list_data_free(GList *list)
+{
+  g_list_foreach(list, (GFunc)g_free, NULL);
+  g_list_free(list);
+}
 
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
@@ -79,7 +167,7 @@ get_charset(gchar *line)
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
 static gchar *
-convert_charset(const gchar *charset, const gchar *str)       
+convert_charset(const gchar *charset, const gchar *str)
 {
   if (!charset)
     return NULL;
@@ -168,7 +256,7 @@ helper_toolbar_prop_label_update(GtkWidget *widget, gchar **lines)
 
   i = 0;
   while (lines[i] && strcmp("", lines[i]))
-    i++;                                                        
+    i++;
 
   /* XXX: remove prop_buttons */
 
@@ -231,17 +319,57 @@ uim_toolbar_get_im_list(void)
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
 static void
+im_data_flush(gpointer data)
+{
+  GList *list;
+  list = g_object_get_data(data, "im_name");
+  list_data_free(list);
+  list = g_object_get_data(data, "im_state");
+  list_data_free(list);
+
+  g_object_set_data(G_OBJECT(data), "im_name", NULL);
+  g_object_set_data(G_OBJECT(data), "im_state", NULL);
+}
+
+/*
+ * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ */
+static void
+im_button_append_menu(GtkWidget *button, gchar **cols)
+{
+  GList *im_list = g_object_get_data(G_OBJECT(button), "im_name");
+  const gchar *im_name, *state;
+  /* const gchar *im_lang, *im_desc; */
+
+  im_name = cols[0];
+  state = cols[3];
+
+  im_list = g_list_append(im_list, g_strdup(im_name));
+  g_object_set_data(G_OBJECT(button), "im_name", im_list);
+
+  if (state) {
+    GList *state_list = g_object_get_data(G_OBJECT(button), "im_state");
+    state_list = g_list_append(state_list, g_strdup(state));
+    g_object_set_data(G_OBJECT(button), "im_state", state_list);
+  }
+}
+
+/*
+ * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ * modified for GKrellUIM
+ */
+static void
 helper_toolbar_im_list_update(GtkWidget *widget, gchar **lines)
 {
-  /* XXX: remove im_button */
-
+  GtkWidget *im_button;
   int i;
   gchar **cols;
   gchar *charset = NULL;
 
   charset = get_charset(lines[1]);
 
-  /* XXX: remove im_button */
+  /* GKrellUIM */
+  im_data_flush(widget);
 
   i = 2;
   while (lines[i] && strcmp("", lines[i])) {
@@ -254,7 +382,8 @@ helper_toolbar_im_list_update(GtkWidget *widget, gchar **lines)
       cols = g_strsplit(lines[i], "\t", 0);
     }
     if (cols && cols[0]) {
-      /* XXX: remove im_button */
+      /* GKrellUIM */
+      im_button_append_menu(widget, cols);
       g_strfreev(cols);
     }
     i++;
@@ -280,10 +409,10 @@ helper_toolbar_parse_helper_str(GtkWidget *widget, gchar *str)
       uim_toolbar_get_im_list();
     else if (g_str_has_prefix(lines[0], "im_list"))
       helper_toolbar_im_list_update(widget, lines);
-    /* else if (!strcmp("custom_reload_notify", lines[0])) {
+    else if (!strcmp("custom_reload_notify", lines[0])) {
       uim_prop_reload_configs();
       helper_toolbar_check_custom();
-    } */
+    }
     g_strfreev(lines);
   }
 }
@@ -325,4 +454,23 @@ uim_toolbar_check_helper_connection(GtkWidget *widget)
       g_io_channel_unref(channel);
     }
   }
+}
+
+/*
+ * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ * modified for GKrellUIM
+ */
+void
+/* GkrellUIM: toolbar_new */
+im_menu_button_new(GtkWidget *vbox, GtkWidget *button)
+{
+  g_object_set_data(G_OBJECT(vbox), OBJECT_DATA_IM_BUTTON, button);
+
+  helper_toolbar_check_custom();
+
+  uim_fd = -1;
+
+  uim_toolbar_check_helper_connection(vbox);
+  uim_helper_client_get_prop_list();
+  uim_toolbar_get_im_list();
 }

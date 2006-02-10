@@ -1,3 +1,32 @@
+2006-02-xx dai <d+gkrelluim@vdr.jp>
+
+	* gkrelluim.c
+	  - add helper_toolbar_check_custom
+	  - remove apply_gkrelluim_config
+	           save_gkrelluim_config
+		   load_gkrelluim_config
+	  - sync _CommandEntry svn3105
+	  - modify cb_menu_button
+	* uim-helper.c
+	  - add OBJECT_DATA_IM_BUTTON
+	        im_menu_activate
+		create_im_menu (popup_im_menu)
+		list_data_free
+		uim_toolbar_get_im_list
+		im_data_flush
+		im_button_append_menu
+		helper_toolbar_im_list_update
+		im_menu_button_new
+	  - sync svn3105 get_charset
+	                 convert_charset
+			 helper_toolbar_prop_list_update
+			 helper_toolbar_prop_label_update
+			 helper_toolbar_parse_helper_str
+			 fd_read_cb
+			 uim_toolbar_check_helper_connection
+	* ja.po
+	  - update
+
 2005-10-29 dai <d+gkrelluim@vdr.jp>
 
 	* Release 0.0.6

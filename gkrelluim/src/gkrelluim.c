@@ -1,16 +1,16 @@
 /*
   GKrellUIM: GKrellM UIM helper Plugin
- 
+
   Copyright (C) 2004-2006 dai <d+gkrelluim@vdr.jp>
   All rights reserved.
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by 
-  the Free Software Foundation; either version 2 of the License, or 
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
   (at your option) any later version.
 
   This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
@@ -38,7 +38,6 @@ static gint style_id;
 #include <uim/uim.h>            /* uim_bool */
 #include <uim/uim-helper.h>     /* uim_helper_client_get_prop_list */
 #include <uim/uim-compat-scm.h> /* uim_scm_symbol_value_bool */
-void uim_toolbar_check_helper_connection( GtkWidget* );
 extern int uim_fd;
 
 /* GKrellUIM */
@@ -105,6 +104,20 @@ static struct _CommandEntry {
 static gint command_entry_len = sizeof(command_entry) / sizeof(struct _CommandEntry);
 
 /*
+ * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ * modified for GKrellUIM
+ */
+/* GkrellUIM: static */ void
+helper_toolbar_check_custom()
+{
+  int i;
+
+  for (i = 0; i < command_entry_len; i++)
+    command_entry[i].show_button =
+      uim_scm_symbol_value_bool(command_entry[i].custom_button_show_symbol);
+}
+
+/*
  * taken from gkrellm2-demos/demo2.c
  */
 static gint
@@ -166,17 +179,19 @@ exec_command( gint data ) {
  */
 static void
 cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
-  GtkWidget *menu;
+  GtkWidget *menu      = gtk_menu_new();
+  GtkWidget *separator = gtk_separator_menu_item_new();
   GtkWidget *item[ command_entry_len ];
   gint       i;
-  gboolean   show = FALSE;
 
-  menu = gtk_menu_new();
+  create_im_menu( menu, event );
+
+  gtk_menu_shell_append( GTK_MENU_SHELL( menu ), separator );
+  gtk_widget_show( separator );
 
   uim_init();
   for( i = 0; i < command_entry_len; i++ ) {
     if( uim_scm_symbol_value_bool( command_entry[ i ].custom_button_show_symbol ) ) {
-      show = TRUE;
       item[ i ] = gtk_menu_item_new_with_label( _(command_entry[ i ].desc) );
       gtk_menu_shell_append( GTK_MENU_SHELL( menu ), item[ i ] );
       g_signal_connect_swapped( G_OBJECT( item[ i ] ), "activate",
@@ -187,11 +202,9 @@ cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
   }
   uim_quit();
 
-  if( show ) {
-    gtk_menu_popup( GTK_MENU( menu ), NULL, NULL,
-                    NULL, NULL,
-                    event->button, gtk_get_current_event_time() );
-  }
+  gtk_menu_popup( GTK_MENU( menu ), NULL, NULL,
+                  NULL, NULL,
+                  event->button, gtk_get_current_event_time() );
 }
 
 /*
@@ -244,7 +257,7 @@ create_gkrelluim( GtkWidget *vbox, gint first_create ) {
   button = gkrellm_make_scaled_button( panel,
 	NULL,		/* GkrellmPiximage image		*/
 	cb_menu_button,	/* Button clicked callback function	*/
-	button,		/* Arg to callback function		*/
+	vbox,		/* Arg to callback function		*/
 	FALSE,		/* auto_hide				*/
 	FALSE,		/* set_default_border			*/
 	0,		/* Image depth				*/
@@ -264,10 +277,7 @@ create_gkrelluim( GtkWidget *vbox, gint first_create ) {
   }
 
   if( first_create ) {
-    /* taken from uim-svn3105/helper/toolbar-common-gtk.c:toolbar_new */
-    uim_fd = -1;
-    uim_toolbar_check_helper_connection( vbox );
-    uim_helper_client_get_prop_list();
+    im_menu_button_new( vbox, button );
   }
 }
 
