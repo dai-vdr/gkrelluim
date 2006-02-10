@@ -59,6 +59,9 @@ static unsigned int read_tag;
 extern gchar *mode_text;
 extern gchar *input_text;
 
+void helper_toolbar_check_custom();
+void uim_toolbar_check_helper_connection(GtkWidget*);
+
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
@@ -361,7 +364,8 @@ im_button_append_menu(GtkWidget *button, gchar **cols)
 static void
 helper_toolbar_im_list_update(GtkWidget *widget, gchar **lines)
 {
-  GtkWidget *im_button;
+  /* XXX: remove im_button */
+
   int i;
   gchar **cols;
   gchar *charset = NULL;

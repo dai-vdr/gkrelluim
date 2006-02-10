@@ -47,6 +47,9 @@ static GkrellmDecal *input_text_decal;
 gchar *mode_text  = "?";
 gchar *input_text = "-";
 
+void create_im_menu(GtkWidget*, GtkWidget*);
+void im_menu_button_new(GtkWidget*, GtkWidget*);
+
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
@@ -184,12 +187,11 @@ cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
   GtkWidget *item[ command_entry_len ];
   gint       i;
 
-  create_im_menu( menu, event );
+  create_im_menu( menu, GTK_WIDGET(event) );
 
   gtk_menu_shell_append( GTK_MENU_SHELL( menu ), separator );
   gtk_widget_show( separator );
 
-  uim_init();
   for( i = 0; i < command_entry_len; i++ ) {
     if( uim_scm_symbol_value_bool( command_entry[ i ].custom_button_show_symbol ) ) {
       item[ i ] = gtk_menu_item_new_with_label( _(command_entry[ i ].desc) );
@@ -200,7 +202,6 @@ cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
       gtk_widget_show( item[ i ] );
     }
   }
-  uim_quit();
 
   gtk_menu_popup( GTK_MENU( menu ), NULL, NULL,
                   NULL, NULL,
@@ -274,10 +275,8 @@ create_gkrelluim( GtkWidget *vbox, gint first_create ) {
   if( first_create ) {
     g_signal_connect( G_OBJECT( panel->drawing_area ), "expose_event",
                       G_CALLBACK( panel_expose_event ), NULL );
-  }
 
-  if( first_create ) {
-    im_menu_button_new( vbox, button );
+    im_menu_button_new( vbox, (GtkWidget*)(button) );
   }
 }
 
@@ -289,12 +288,8 @@ static void
 create_gkrelluim_tab( GtkWidget *tab_vbox ) {
   GtkWidget *tabs, *text;
 
-  GtkWidget *frame;
-  GtkWidget *vbox, *hbox, *zbox;
-
   GtkWidget *label;
   gchar     *label_text;
-  gint       i;
 
   tabs = gtk_notebook_new();
   gtk_notebook_set_tab_pos( GTK_NOTEBOOK( tabs ), GTK_POS_TOP );
@@ -340,6 +335,10 @@ static GkrellmMonitor plugin_gkrelluim = {
   NULL		/* path if a plugin, filled in by GKrellM	*/
 };
 
+void gkrelluim_quit_plugin( void ) {
+  uim_quit();
+}
+
 /*
  * gkrellm_init_plugin
  */
@@ -347,9 +346,12 @@ GkrellmMonitor *gkrellm_init_plugin( void ) {
 #ifdef ENABLE_NLS
   bind_textdomain_codeset( PACKAGE, "UTF-8" );
 #endif
+  uim_init();
 
   style_id = gkrellm_add_meter_style( &plugin_gkrelluim, STYLE_NAME );
   monitor = &plugin_gkrelluim;
+
+  g_atexit(gkrelluim_quit_plugin);
 
   return &plugin_gkrelluim;
 }

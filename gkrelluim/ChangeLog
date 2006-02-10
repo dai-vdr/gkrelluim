@@ -2,6 +2,7 @@
 
 	* gkrelluim.c
 	  - add helper_toolbar_check_custom
+	        gkrelluim_quit_plugin
 	  - remove apply_gkrelluim_config
 	           save_gkrelluim_config
 		   load_gkrelluim_config
