@@ -16,7 +16,6 @@
 		im_data_flush
 		im_button_append_menu
 		helper_toolbar_im_list_update
-		im_menu_button_new
 	  - sync svn3105 get_charset
 	                 convert_charset
 			 helper_toolbar_prop_list_update

@@ -39,6 +39,7 @@ static gint style_id;
 #include <uim/uim-helper.h>     /* uim_helper_client_get_prop_list */
 #include <uim/uim-compat-scm.h> /* uim_scm_symbol_value_bool */
 extern int uim_fd;
+#define OBJECT_DATA_IM_BUTTON "IM_BUTTON"
 
 /* GKrellUIM */
 static GkrellmDecal *text_decal;
@@ -279,7 +280,15 @@ create_gkrelluim( GtkWidget *vbox, gint first_create ) {
     uim_init();
     gkrellm_disable_plugin_connect( monitor, uim_quit );
 
-    im_menu_button_new( vbox, (GtkWidget*)(button) );
+    g_object_set_data(G_OBJECT(vbox), OBJECT_DATA_IM_BUTTON, button);
+
+    helper_toolbar_check_custom();
+
+    uim_fd = -1;
+
+    uim_toolbar_check_helper_connection(vbox);
+    uim_helper_client_get_prop_list();
+    uim_toolbar_get_im_list();
   }
 }
 

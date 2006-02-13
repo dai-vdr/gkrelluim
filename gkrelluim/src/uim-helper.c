@@ -50,8 +50,6 @@
 #include <uim/uim-helper.h>
 #include <string.h>
 #include <stdlib.h>
-#define OBJECT_DATA_IM_BUTTON "IM_BUTTON"
-#define OBJECT_DATA_SIZE_GROUP "SIZE_GROUP"
 static unsigned int read_tag;
 /* GKrellUIM: static */ int uim_fd;
 
@@ -458,25 +456,4 @@ uim_toolbar_check_helper_connection(GtkWidget *widget)
       g_io_channel_unref(channel);
     }
   }
-}
-
-/*
- * taken from uim-svn3105/helper/toolbar-common-gtk.c
- * modified for GKrellUIM
- */
-void
-/* GkrellUIM: toolbar_new */
-im_menu_button_new(GtkWidget *vbox, GtkWidget *button)
-{
-  uim_init();
-
-  g_object_set_data(G_OBJECT(vbox), OBJECT_DATA_IM_BUTTON, button);
-
-  helper_toolbar_check_custom();
-
-  uim_fd = -1;
-
-  uim_toolbar_check_helper_connection(vbox);
-  uim_helper_client_get_prop_list();
-  uim_toolbar_get_im_list();
 }
