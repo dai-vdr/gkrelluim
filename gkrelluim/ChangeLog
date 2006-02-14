@@ -2,6 +2,8 @@
 
 	* gkrelluim.c
 	  - add helper_toolbar_check_custom
+	        cb_mode_button
+		cb_input_button
 	  - remove apply_gkrelluim_config
 	           save_gkrelluim_config
 		   load_gkrelluim_config
@@ -11,11 +13,16 @@
 	  - add OBJECT_DATA_IM_BUTTON
 	        im_menu_activate
 		create_im_menu (popup_im_menu)
+		prop_menu_activate
+		create_prop_menu (popup_prop_menu)
 		list_data_free
+		prop_data_flush
+		prop_button_append_menu
 		uim_toolbar_get_im_list
 		im_data_flush
 		im_button_append_menu
 		helper_toolbar_im_list_update
+		helper_init
 	  - sync svn3105 get_charset
 	                 convert_charset
 			 helper_toolbar_prop_list_update
@@ -23,6 +30,8 @@
 			 helper_toolbar_parse_helper_str
 			 fd_read_cb
 			 uim_toolbar_check_helper_connection
+	* gkrelluim.h
+	  - new file
 	* ja.po
 	  - update
 

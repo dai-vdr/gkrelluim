@@ -46,16 +46,20 @@
 #include <gtk/gtk.h>
 
 /* UIM */
-#include <uim/uim.h>
-#include <uim/uim-helper.h>
 #include <string.h>
 #include <stdlib.h>
 static unsigned int read_tag;
 /* GKrellUIM: static */ int uim_fd;
 
 /* GKrellUIM */
+#include "gkrelluim.h"
 extern gchar *mode_text;
 extern gchar *input_text;
+
+const gchar *prop_label[]   = { "mode_label",   "input_label"   };
+const gchar *prop_tooltip[] = { "mode_tooltip", "input_tooltip" };
+const gchar *prop_action[]  = { "mode_action",  "input_action"  };
+const gchar *prop_state[]   = { "mode_state",   "input_state"   };
 
 void helper_toolbar_check_custom();
 void uim_toolbar_check_helper_connection(GtkWidget*);
@@ -141,10 +145,153 @@ create_im_menu(GtkWidget *im_menu, GtkWidget *widget)
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
 static void
+prop_menu_activate(GtkMenu *menu_item, gpointer data)
+{
+  GString *msg;
+
+  msg = g_string_new((gchar *)g_object_get_data(G_OBJECT(menu_item),
+                     "prop_action"));
+  g_string_prepend(msg, "prop_activate\n");
+  g_string_append(msg, "\n");
+  uim_helper_send_message(uim_fd, msg->str);
+  g_string_free(msg, TRUE);
+}
+
+/*
+ * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ * modified for GKrellUIM
+ */
+/* GKrellUIM: static */ void
+/* GKrellUIM: popup_prop_menu */
+create_prop_menu(GtkWidget *prop_menu, GtkWidget *widget, const gint type)
+{
+  GtkWidget *menu_item;
+  GtkTooltips *tooltip;
+  GList *menu_item_list, *label_list, *tooltip_list, *action_list, *state_list;
+  int i, selected = -1;
+
+  /* GKrellUIM */
+  uim_toolbar_check_helper_connection(widget);
+
+  menu_item_list = gtk_container_get_children(GTK_CONTAINER(prop_menu));
+
+  /* GKrellUIM */
+  label_list   = g_object_get_data(G_OBJECT(widget), prop_label  [type]);
+  tooltip_list = g_object_get_data(G_OBJECT(widget), prop_tooltip[type]);
+  action_list  = g_object_get_data(G_OBJECT(widget), prop_action [type]);
+  state_list   = g_object_get_data(G_OBJECT(widget), prop_state  [type]);
+
+  /* XXX: remove gtk_widget_destroy */
+
+  /* check if state_list contains state data */
+  i = 0;
+  while (state_list) {
+    if (!strcmp("*", state_list->data)) {
+      selected = i;
+      break;
+    }
+    state_list = state_list->next;
+    i++;
+  }
+
+  i = 0;
+  while (label_list) {
+    if (selected != -1) {
+      menu_item = gtk_check_menu_item_new_with_label(label_list->data);
+#if GTK_CHECK_VERSION(2, 4, 0)
+      gtk_check_menu_item_set_draw_as_radio(GTK_CHECK_MENU_ITEM(menu_item),
+                                            TRUE);
+#endif
+      if (i == selected)
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item), TRUE);
+    } else {
+      menu_item = gtk_menu_item_new_with_label(label_list->data);
+    }
+
+    /* tooltips */
+    tooltip = gtk_tooltips_new();
+    gtk_tooltips_set_tip(tooltip, menu_item, tooltip_list ? tooltip_list->data : NULL, NULL);
+
+    /* add to the menu */
+    gtk_menu_shell_append(GTK_MENU_SHELL(prop_menu), menu_item);
+
+    gtk_widget_show(menu_item);
+    g_signal_connect(G_OBJECT(menu_item), "activate",
+                     G_CALLBACK(prop_menu_activate), prop_menu);
+    g_object_set_data(G_OBJECT(menu_item), "prop_action", action_list? action_list->data : NULL);
+    label_list = label_list->next;
+    if (action_list)
+      action_list = action_list->next;
+    if (tooltip_list)
+      tooltip_list = tooltip_list->next;
+    i++;
+  }
+}
+
+/*
+ * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ */
+static void
 list_data_free(GList *list)
 {
   g_list_foreach(list, (GFunc)g_free, NULL);
   g_list_free(list);
+}
+
+/*
+ * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ * modified for GKrellUIM
+ */
+static void
+prop_data_flush(gpointer data, const gint type)
+{
+  GList *list;
+  /* GKrellUIM */
+  list = g_object_get_data(data, prop_label  [type]);
+  list_data_free(list);
+  list = g_object_get_data(data, prop_tooltip[type]);
+  list_data_free(list);
+  list = g_object_get_data(data, prop_action [type]);
+  list_data_free(list);
+  list = g_object_get_data(data, prop_state  [type]);
+  list_data_free(list);
+
+  /* GKrellUIM */
+  g_object_set_data(G_OBJECT(data), prop_label  [type], NULL);
+  g_object_set_data(G_OBJECT(data), prop_tooltip[type], NULL);
+  g_object_set_data(G_OBJECT(data), prop_action [type], NULL);
+  g_object_set_data(G_OBJECT(data), prop_state  [type], NULL);
+}
+
+/*
+ * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ * modified for GKrellUIM
+ */
+static void
+prop_button_append_menu(GtkWidget *button, const gint type,
+                        const gchar *label, const gchar *tooltip,
+                        const gchar *action, const gchar *state)
+{
+  /* GKrellUIM */
+  GList *label_list   = g_object_get_data(G_OBJECT(button), prop_label  [type]);
+  GList *tooltip_list = g_object_get_data(G_OBJECT(button), prop_tooltip[type]);
+  GList *action_list  = g_object_get_data(G_OBJECT(button), prop_action [type]);
+
+  label_list   = g_list_append(label_list,   g_strdup(label)  );
+  tooltip_list = g_list_append(tooltip_list, g_strdup(tooltip));
+  action_list  = g_list_append(action_list,  g_strdup(action) );
+
+  /* GKrellUIM */
+  g_object_set_data(G_OBJECT(button), prop_label  [type], label_list  );
+  g_object_set_data(G_OBJECT(button), prop_tooltip[type], tooltip_list);
+  g_object_set_data(G_OBJECT(button), prop_action [type], action_list );
+
+  /* GKrellUIM */
+  if (state) {
+    GList *state_list = g_object_get_data(G_OBJECT(button), prop_state[type]);
+    state_list = g_list_append(state_list, g_strdup(state));
+    g_object_set_data(G_OBJECT(button), prop_state[type], state_list);
+  }
 }
 
 /*
@@ -188,18 +335,19 @@ static void
 helper_toolbar_prop_list_update(GtkWidget *widget, gchar **lines)
 {
   /* XXX: remove button */
-
   int i;
   gchar **cols;
   gchar *charset = NULL;
+  /* XXX: remove prop_buttons & tool_buttons */
   /* GKrellUIM */
   gint branch_number = 0;
-
-  /* XXX: remove prop_buttons & tool_buttons */
 
   charset = get_charset(lines[1]);
 
   /* XXX: remove prop_buttons & tool_buttons */
+  /* GKrellUIM */
+  prop_data_flush(widget, TYPE_MODE );
+  prop_data_flush(widget, TYPE_INPUT);
 
   /* GKrellUIM */
   mode_text  = g_strdup( "?" );
@@ -220,16 +368,33 @@ helper_toolbar_prop_list_update(GtkWidget *widget, gchar **lines)
       if (!strcmp("branch", cols[0])) {
         /* XXX: remove button */
         /* GKrellUIM */
+        switch( branch_number ) {
+          case TYPE_MODE:
+            mode_text  = g_strdup( cols[1] );
+            break;
+          case TYPE_INPUT:
+            input_text = g_strdup( cols[1] );
+            break;
+          default:
+            break;
+        }
         branch_number++;
-        if( i == 2 ) {
-          mode_text = g_strdup( cols[1] );
+      } else if (!strcmp("leaf", cols[0])) {
+        /* XXX: remove button */
+        /* GKrellUIM */
+        switch( branch_number - 1 ) {
+          case TYPE_MODE:
+            prop_button_append_menu(widget, TYPE_MODE,
+                                    cols[2], cols[3], cols[4], cols[5]);
+            break;
+          case TYPE_INPUT:
+            prop_button_append_menu(widget, TYPE_INPUT,
+                                    cols[2], cols[3], cols[4], cols[5]);
+            break;
+          default:
+            break;
         }
-        if( branch_number == 2 ) {
-          input_text = g_strdup( cols[1] );
-        }
-      } /* else if (!strcmp("leaf", cols[0])) {
-           XXX: remove button
-      } */
+      }
       g_strfreev(cols);
     }
     i++;
@@ -456,4 +621,16 @@ uim_toolbar_check_helper_connection(GtkWidget *widget)
       g_io_channel_unref(channel);
     }
   }
+}
+
+/* GKrellUIM */
+void helper_init(GtkWidget *widget )
+{
+  helper_toolbar_check_custom();
+
+  uim_fd = -1;
+
+  uim_toolbar_check_helper_connection( widget );
+  uim_helper_client_get_prop_list();
+  uim_toolbar_get_im_list();
 }

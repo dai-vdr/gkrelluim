@@ -35,13 +35,10 @@ static GkrellmDecal   *decal;
 static gint style_id;
 
 /* UIM */
-#include <uim/uim.h>            /* uim_bool */
-#include <uim/uim-helper.h>     /* uim_helper_client_get_prop_list */
-#include <uim/uim-compat-scm.h> /* uim_scm_symbol_value_bool */
 extern int uim_fd;
-#define OBJECT_DATA_IM_BUTTON "IM_BUTTON"
 
 /* GKrellUIM */
+#include "gkrelluim.h"
 static GkrellmDecal *text_decal;
 static GkrellmDecal *mode_text_decal;
 static GkrellmDecal *input_text_decal;
@@ -49,7 +46,8 @@ gchar *mode_text  = "?";
 gchar *input_text = "-";
 
 void create_im_menu(GtkWidget*, GtkWidget*);
-void im_menu_button_new(GtkWidget*, GtkWidget*);
+void create_prop_menu(GtkWidget*, GtkWidget*, const gint);
+void helper_init(GtkWidget*);
 
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
@@ -111,7 +109,7 @@ static gint command_entry_len = sizeof(command_entry) / sizeof(struct _CommandEn
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  * modified for GKrellUIM
  */
-/* GkrellUIM: static */ void
+/* GKrellUIM: static */ void
 helper_toolbar_check_custom()
 {
   int i;
@@ -209,6 +207,28 @@ cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
                   event->button, gtk_get_current_event_time() );
 }
 
+static void
+cb_mode_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
+  GtkWidget *menu = gtk_menu_new();
+
+  create_prop_menu( menu, GTK_WIDGET(event), TYPE_MODE );
+
+  gtk_menu_popup( GTK_MENU( menu ), NULL, NULL,
+                  NULL, NULL,
+                  event->button, gtk_get_current_event_time() );
+}
+
+static void
+cb_input_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
+  GtkWidget *menu = gtk_menu_new();
+
+  create_prop_menu( menu, GTK_WIDGET(event), TYPE_INPUT );
+
+  gtk_menu_popup( GTK_MENU( menu ), NULL, NULL,
+                  NULL, NULL,
+                  event->button, gtk_get_current_event_time() );
+}
+
 /*
  * taken from gkrellm2-demos/demo[234].c
  * modified for GKrellUIM
@@ -241,20 +261,29 @@ create_gkrelluim( GtkWidget *vbox, gint first_create ) {
 	5,
 	0 );
 
-  /* GKrellUIM */
+  /* mode button */
   mode_text_decal = gkrellm_create_decal_text( panel, "Aq", text_style, style,
 	0 + 5,
 	5,
 	0 );
+  gkrellm_put_decal_in_meter_button( panel, mode_text_decal,
+	cb_mode_button,
+	vbox,
+	NULL );
   gkrellm_draw_decal_text( panel, mode_text_decal, mode_text, 0 );
 
-  /* GKrellUIM */
+  /* input button */
   input_text_decal = gkrellm_create_decal_text( panel, "Aq", text_style, style,
 	20 + 5,
 	5,
 	0 );
+  gkrellm_put_decal_in_meter_button( panel, input_text_decal,
+	cb_input_button,
+	vbox,
+	NULL );
   gkrellm_draw_decal_text( panel, input_text_decal, input_text, 0 );
 
+  /* menu button */
   x = decal->x + decal->w;
   button = gkrellm_make_scaled_button( panel,
 	NULL,		/* GkrellmPiximage image		*/
@@ -280,15 +309,9 @@ create_gkrelluim( GtkWidget *vbox, gint first_create ) {
     uim_init();
     gkrellm_disable_plugin_connect( monitor, uim_quit );
 
-    g_object_set_data(G_OBJECT(vbox), OBJECT_DATA_IM_BUTTON, button);
+    g_object_set_data( G_OBJECT( vbox ), OBJECT_DATA_IM_BUTTON, button );
 
-    helper_toolbar_check_custom();
-
-    uim_fd = -1;
-
-    uim_toolbar_check_helper_connection(vbox);
-    uim_helper_client_get_prop_list();
-    uim_toolbar_get_im_list();
+    helper_init( vbox );
   }
 }
 
