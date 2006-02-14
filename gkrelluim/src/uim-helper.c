@@ -633,4 +633,6 @@ void helper_init(GtkWidget *widget )
   uim_toolbar_check_helper_connection( widget );
   uim_helper_client_get_prop_list();
   uim_toolbar_get_im_list();
+
+  g_atexit( uim_quit );
 }

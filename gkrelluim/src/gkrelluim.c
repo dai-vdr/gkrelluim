@@ -114,6 +114,9 @@ helper_toolbar_check_custom()
 {
   int i;
 
+  /* GKrellUIM */
+  uim_init();
+
   for (i = 0; i < command_entry_len; i++)
     command_entry[i].show_button =
       uim_scm_symbol_value_bool(command_entry[i].custom_button_show_symbol);
@@ -185,6 +188,8 @@ cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
   GtkWidget *separator = gtk_separator_menu_item_new();
   GtkWidget *item[ command_entry_len ];
   gint       i;
+
+  uim_init();
 
   create_im_menu( menu, GTK_WIDGET(event) );
 
@@ -302,12 +307,10 @@ create_gkrelluim( GtkWidget *vbox, gint first_create ) {
   gkrellm_panel_configure( panel, NULL, style );
 
   gkrellm_panel_create( vbox, monitor, panel );
+
   if( first_create ) {
     g_signal_connect( G_OBJECT( panel->drawing_area ), "expose_event",
                       G_CALLBACK( panel_expose_event ), NULL );
-
-    uim_init();
-    gkrellm_disable_plugin_connect( monitor, uim_quit );
 
     g_object_set_data( G_OBJECT( vbox ), OBJECT_DATA_IM_BUTTON, button );
 
