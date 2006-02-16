@@ -498,23 +498,24 @@ im_data_flush(gpointer data)
 }
 
 /*
- * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ * taken from uim-svn3109/helper/toolbar-common-gtk.c
  */
 static void
 im_button_append_menu(GtkWidget *button, gchar **cols)
 {
-  GList *im_list = g_object_get_data(G_OBJECT(button), "im_name");
+  GList *im_list, *state_list;
   const gchar *im_name, *state;
   /* const gchar *im_lang, *im_desc; */
 
   im_name = cols[0];
   state = cols[3];
 
+  im_list = g_object_get_data(G_OBJECT(button), "im_name");
   im_list = g_list_append(im_list, g_strdup(im_name));
   g_object_set_data(G_OBJECT(button), "im_name", im_list);
 
   if (state) {
-    GList *state_list = g_object_get_data(G_OBJECT(button), "im_state");
+    state_list = g_object_get_data(G_OBJECT(button), "im_state");
     state_list = g_list_append(state_list, g_strdup(state));
     g_object_set_data(G_OBJECT(button), "im_state", state_list);
   }
