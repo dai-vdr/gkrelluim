@@ -48,11 +48,12 @@
 /* UIM */
 #include <string.h>
 #include <stdlib.h>
+#include <uim/uim.h>
+#include <uim/uim-helper.h>
 static unsigned int read_tag;
 /* GKrellUIM: static */ int uim_fd;
 
 /* GKrellUIM */
-#include "gkrelluim.h"
 extern gchar *mode_text;
 extern gchar *input_text;
 
@@ -60,6 +61,11 @@ const gchar *prop_label[]   = { "mode_label",   "input_label"   };
 const gchar *prop_tooltip[] = { "mode_tooltip", "input_tooltip" };
 const gchar *prop_action[]  = { "mode_action",  "input_action"  };
 const gchar *prop_state[]   = { "mode_state",   "input_state"   };
+
+enum {
+  TYPE_MODE=0,
+  TYPE_INPUT=1
+};
 
 void helper_toolbar_check_custom();
 void uim_toolbar_check_helper_connection(GtkWidget*);
@@ -161,7 +167,7 @@ prop_menu_activate(GtkMenu *menu_item, gpointer data)
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  * modified for GKrellUIM
  */
-/* GKrellUIM: static */ void
+static void
 /* GKrellUIM: popup_prop_menu */
 create_prop_menu(GtkWidget *prop_menu, GtkWidget *widget, const gint type)
 {
@@ -228,6 +234,16 @@ create_prop_menu(GtkWidget *prop_menu, GtkWidget *widget, const gint type)
   }
 }
 
+/* GKrellUIM */
+void create_mode_menu( GtkWidget *menu, GtkWidget *event ) {
+  create_prop_menu( menu, event, TYPE_MODE );
+}
+
+/* GKrellUIM */
+void create_input_menu( GtkWidget *menu, GtkWidget *event ) {
+  create_prop_menu( menu, event, TYPE_INPUT );
+}
+
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
@@ -263,6 +279,20 @@ prop_data_flush(gpointer data, const gint type)
   g_object_set_data(G_OBJECT(data), prop_state  [type], NULL);
 }
 
+/* GKrellUIM */
+static void
+mode_data_flush(gpointer data)
+{
+  prop_data_flush(data,TYPE_MODE);
+}
+
+/* GKrellUIM */
+static void
+input_data_flush(gpointer data)
+{
+  prop_data_flush(data,TYPE_INPUT);
+}
+
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  * modified for GKrellUIM
@@ -292,6 +322,24 @@ prop_button_append_menu(GtkWidget *button, const gint type,
     state_list = g_list_append(state_list, g_strdup(state));
     g_object_set_data(G_OBJECT(button), prop_state[type], state_list);
   }
+}
+
+/* GKrellUIM */
+static void
+mode_button_append_menu(GtkWidget *button,
+                        const gchar *label, const gchar *tooltip,
+                        const gchar *action, const gchar *state)
+{
+  prop_button_append_menu(button,TYPE_MODE,label,tooltip,action,state);
+}
+
+/* GKrellUIM */
+static void
+input_button_append_menu(GtkWidget *button,
+                        const gchar *label, const gchar *tooltip,
+                        const gchar *action, const gchar *state)
+{
+  prop_button_append_menu(button,TYPE_INPUT,label,tooltip,action,state);
 }
 
 /*
@@ -340,14 +388,14 @@ helper_toolbar_prop_list_update(GtkWidget *widget, gchar **lines)
   gchar *charset = NULL;
   /* XXX: remove prop_buttons & tool_buttons */
   /* GKrellUIM */
-  gint branch_number = 0;
+  gint branch_number = -1;
 
   charset = get_charset(lines[1]);
 
   /* XXX: remove prop_buttons & tool_buttons */
   /* GKrellUIM */
-  prop_data_flush(widget, TYPE_MODE );
-  prop_data_flush(widget, TYPE_INPUT);
+  mode_data_flush(widget);
+  input_data_flush(widget);
 
   /* GKrellUIM */
   mode_text  = g_strdup( "?" );
@@ -368,6 +416,7 @@ helper_toolbar_prop_list_update(GtkWidget *widget, gchar **lines)
       if (!strcmp("branch", cols[0])) {
         /* XXX: remove button */
         /* GKrellUIM */
+        branch_number++;
         switch( branch_number ) {
           case TYPE_MODE:
             mode_text  = g_strdup( cols[1] );
@@ -378,18 +427,17 @@ helper_toolbar_prop_list_update(GtkWidget *widget, gchar **lines)
           default:
             break;
         }
-        branch_number++;
       } else if (!strcmp("leaf", cols[0])) {
         /* XXX: remove button */
         /* GKrellUIM */
-        switch( branch_number - 1 ) {
+        switch( branch_number ) {
           case TYPE_MODE:
-            prop_button_append_menu(widget, TYPE_MODE,
+            mode_button_append_menu(widget,
                                     cols[2], cols[3], cols[4], cols[5]);
             break;
           case TYPE_INPUT:
-            prop_button_append_menu(widget, TYPE_INPUT,
-                                    cols[2], cols[3], cols[4], cols[5]);
+            input_button_append_menu(widget,
+                                     cols[2], cols[3], cols[4], cols[5]);
             break;
           default:
             break;

@@ -35,10 +35,11 @@ static GkrellmDecal   *decal;
 static gint style_id;
 
 /* UIM */
+#include <uim/uim.h>
+#define OBJECT_DATA_IM_BUTTON "IM_BUTTON"
 extern int uim_fd;
 
 /* GKrellUIM */
-#include "gkrelluim.h"
 static GkrellmDecal *text_decal;
 static GkrellmDecal *mode_text_decal;
 static GkrellmDecal *input_text_decal;
@@ -46,63 +47,82 @@ gchar *mode_text  = "?";
 gchar *input_text = "-";
 
 void create_im_menu(GtkWidget*, GtkWidget*);
-void create_prop_menu(GtkWidget*, GtkWidget*, const gint);
+void create_mode_menu(GtkWidget*, GtkWidget*);
+void create_input_menu(GtkWidget*, GtkWidget*);
 void helper_init(GtkWidget*);
 
 /*
- * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ * taken from uim-svn3109/helper/toolbar-common-gtk.c
  */
-/* FIXME! command menu and buttons should be customizable. */
-static struct _CommandEntry {
+struct _CommandEntry {
   const gchar *desc;
   const gchar *label;
   const gchar *icon;
   const gchar *command;
   const gchar *custom_button_show_symbol;
   uim_bool show_button;
-} command_entry[] = {
-  {N_("Switch input method"),
-   NULL,
-   "switcher-icon",
-   "uim-im-switcher-gtk &",
-   "toolbar-show-switcher-button?",
-   UIM_FALSE},
-
-  {N_("Preference"),
-   NULL,
-   GTK_STOCK_PREFERENCES,
-   "uim-pref-gtk &",
-   "toolbar-show-pref-button?",
-   UIM_FALSE},
-
-  {N_("Japanese dictionary editor"),
-   "Dic",
-   NULL,
-   "uim-dict-gtk &",
-   "toolbar-show-dict-button?",
-   UIM_FALSE},
-
-  {N_("Input pad"),
-   "Pad",
-   NULL,
-   "uim-input-pad-ja &",
-   "toolbar-show-input-pad-button?",
-   UIM_FALSE},
-
-  {N_("Handwriting input pad"),
-   "Hand",
-   NULL,
-   "uim-tomoe-gtk &",
-   "toolbar-show-handwriting-input-pad-button?",
-   UIM_FALSE},
-
-  {N_("Help"),
-   NULL,
-   GTK_STOCK_HELP,
-   "uim-help &",
-   "toolbar-show-help-button?",
-   UIM_FALSE}
 };
+
+/*
+ * taken from uim-svn3109/helper/toolbar-common-gtk.c
+ */
+/* FIXME! command menu and buttons should be customizable. */
+static struct _CommandEntry command_entry[] = {
+  {
+    N_("Switch input method"),
+    NULL,
+    "switcher-icon",
+    "uim-im-switcher-gtk &",
+    "toolbar-show-switcher-button?",
+    UIM_FALSE
+  },
+
+  {
+    N_("Preference"),
+    NULL,
+    GTK_STOCK_PREFERENCES,
+    "uim-pref-gtk &",
+    "toolbar-show-pref-button?",
+    UIM_FALSE
+  },
+
+  {
+    N_("Japanese dictionary editor"),
+    "Dic",
+    NULL,
+    "uim-dict-gtk &",
+    "toolbar-show-dict-button?",
+    UIM_FALSE
+  },
+
+  {
+    N_("Input pad"),
+    "Pad",
+    NULL,
+    "uim-input-pad-ja &",
+    "toolbar-show-input-pad-button?",
+    UIM_FALSE
+  },
+
+  {
+    N_("Handwriting input pad"),
+    "Hand",
+    NULL,
+    "uim-tomoe-gtk &",
+    "toolbar-show-handwriting-input-pad-button?",
+    UIM_FALSE
+  },
+
+  {
+    N_("Help"),
+    NULL,
+    GTK_STOCK_HELP,
+    "uim-help &",
+    "toolbar-show-help-button?",
+    UIM_FALSE
+  }
+};
+
 static gint command_entry_len = sizeof(command_entry) / sizeof(struct _CommandEntry);
 
 /*
@@ -216,7 +236,7 @@ static void
 cb_mode_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
   GtkWidget *menu = gtk_menu_new();
 
-  create_prop_menu( menu, GTK_WIDGET(event), TYPE_MODE );
+  create_mode_menu( menu, GTK_WIDGET(event) );
 
   gtk_menu_popup( GTK_MENU( menu ), NULL, NULL,
                   NULL, NULL,
@@ -227,7 +247,7 @@ static void
 cb_input_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
   GtkWidget *menu = gtk_menu_new();
 
-  create_prop_menu( menu, GTK_WIDGET(event), TYPE_INPUT );
+  create_input_menu( menu, GTK_WIDGET(event) );
 
   gtk_menu_popup( GTK_MENU( menu ), NULL, NULL,
                   NULL, NULL,
