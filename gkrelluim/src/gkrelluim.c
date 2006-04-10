@@ -38,6 +38,7 @@ static gint style_id;
 #include <uim/uim.h>
 #define OBJECT_DATA_IM_BUTTON "IM_BUTTON"
 extern int uim_fd;
+extern uint command_entry_len;
 
 /* GKrellUIM */
 static GkrellmDecal *text_decal;
@@ -50,97 +51,6 @@ void create_im_menu(GtkWidget*, GtkWidget*);
 void create_mode_menu(GtkWidget*, GtkWidget*);
 void create_input_menu(GtkWidget*, GtkWidget*);
 void helper_init(GtkWidget*);
-
-/*
- * taken from uim-svn3109/helper/toolbar-common-gtk.c
- */
-struct _CommandEntry {
-  const gchar *desc;
-  const gchar *label;
-  const gchar *icon;
-  const gchar *command;
-  const gchar *custom_button_show_symbol;
-  uim_bool show_button;
-};
-
-/*
- * taken from uim-svn3109/helper/toolbar-common-gtk.c
- */
-/* FIXME! command menu and buttons should be customizable. */
-static struct _CommandEntry command_entry[] = {
-  {
-    N_("Switch input method"),
-    NULL,
-    "switcher-icon",
-    "uim-im-switcher-gtk &",
-    "toolbar-show-switcher-button?",
-    UIM_FALSE
-  },
-
-  {
-    N_("Preference"),
-    NULL,
-    GTK_STOCK_PREFERENCES,
-    "uim-pref-gtk &",
-    "toolbar-show-pref-button?",
-    UIM_FALSE
-  },
-
-  {
-    N_("Japanese dictionary editor"),
-    "Dic",
-    NULL,
-    "uim-dict-gtk &",
-    "toolbar-show-dict-button?",
-    UIM_FALSE
-  },
-
-  {
-    N_("Input pad"),
-    "Pad",
-    NULL,
-    "uim-input-pad-ja &",
-    "toolbar-show-input-pad-button?",
-    UIM_FALSE
-  },
-
-  {
-    N_("Handwriting input pad"),
-    "Hand",
-    NULL,
-    "uim-tomoe-gtk &",
-    "toolbar-show-handwriting-input-pad-button?",
-    UIM_FALSE
-  },
-
-  {
-    N_("Help"),
-    NULL,
-    GTK_STOCK_HELP,
-    "uim-help &",
-    "toolbar-show-help-button?",
-    UIM_FALSE
-  }
-};
-
-static gint command_entry_len = sizeof(command_entry) / sizeof(struct _CommandEntry);
-
-/*
- * taken from uim-svn3105/helper/toolbar-common-gtk.c
- * modified for GKrellUIM
- */
-/* GKrellUIM: static */ void
-helper_toolbar_check_custom()
-{
-  int i;
-
-  /* GKrellUIM */
-  uim_init();
-
-  for (i = 0; i < command_entry_len; i++)
-    command_entry[i].show_button =
-      uim_scm_symbol_value_bool(command_entry[i].custom_button_show_symbol);
-}
 
 /*
  * taken from gkrellm2-demos/demo2.c
@@ -186,7 +96,8 @@ exec_command( gint data ) {
   GError  *err  = NULL;
   gboolean res;
 
-  if( !g_shell_parse_argv( command_entry[ data ].command, NULL, &argv, &err ) ) {
+  if( !g_shell_parse_argv( (const char*)get_command_entry_command( data ),
+                           NULL, &argv, &err ) ) {
     gkrellm_message_window( "GKrellUIM Error", err->message, NULL );
     g_error_free( err );
   } else {
@@ -217,8 +128,10 @@ cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
   gtk_widget_show( separator );
 
   for( i = 0; i < command_entry_len; i++ ) {
-    if( uim_scm_symbol_value_bool( command_entry[ i ].custom_button_show_symbol ) ) {
-      item[ i ] = gtk_menu_item_new_with_label( _(command_entry[ i ].desc) );
+    if( uim_scm_symbol_value_bool(
+          get_command_entry_custom_button_show_symbol( i ) ) ) {
+      item[ i ] = gtk_menu_item_new_with_label(
+                    _( (const char*)get_command_entry_desc( i )) );
       gtk_menu_shell_append( GTK_MENU_SHELL( menu ), item[ i ] );
       g_signal_connect_swapped( G_OBJECT( item[ i ] ), "activate",
                                 G_CALLBACK( exec_command ),

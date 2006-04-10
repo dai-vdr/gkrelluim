@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gkrelluim 0.0.6\n"
 "Report-Msgid-Bugs-To: d+gkrelluim@vdr.jp\n"
-"POT-Creation-Date: 2006-02-10 17:25+0900\n"
+"POT-Creation-Date: 2006-02-17 18:05+0900\n"
 "PO-Revision-Date: 2006-02-10 17:27+0900\n"
 "Last-Translator: dai <d+gkrelluim@vdr.jp>\n"
 "Language-Team: ja <ja@li.org>\n"
@@ -15,31 +15,31 @@ msgstr ""
 "Content-Type: text/plain; charset=EUC-JP\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/gkrelluim.c:62
+#: src/gkrelluim.c:72
 msgid "Switch input method"
 msgstr "入力方式の切り替え"
 
-#: src/gkrelluim.c:69
+#: src/gkrelluim.c:81
 msgid "Preference"
 msgstr "設定ツール"
 
-#: src/gkrelluim.c:76
+#: src/gkrelluim.c:90
 msgid "Japanese dictionary editor"
 msgstr "日本語辞書ツール"
 
-#: src/gkrelluim.c:83
+#: src/gkrelluim.c:99
 msgid "Input pad"
 msgstr "入力パッド"
 
-#: src/gkrelluim.c:90
+#: src/gkrelluim.c:108
 msgid "Handwriting input pad"
 msgstr "手書き入力パッド"
 
-#: src/gkrelluim.c:97
+#: src/gkrelluim.c:117
 msgid "Help"
 msgstr "ヘルプ"
 
-#: src/gkrelluim.c:305
+#: src/gkrelluim.c:360
 #, c-format
 msgid ""
 "GKrellUIM %s\n"
@@ -60,7 +60,7 @@ msgstr ""
 "\n"
 "GNU General Public License のもとにリリースされています\n"
 
-#: src/gkrelluim.c:313
+#: src/gkrelluim.c:368
 msgid "About"
 msgstr "GKrellUIM について"
 

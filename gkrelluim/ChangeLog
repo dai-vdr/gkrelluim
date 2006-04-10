@@ -1,37 +1,51 @@
-2006-02-xx dai <d+gkrelluim@vdr.jp>
+2006-04-xx dai <d+gkrelluim@vdr.jp>
 
 	* gkrelluim.c
-	  - add helper_toolbar_check_custom
-	        cb_mode_button
+	  - add cb_mode_button
 		cb_input_button
-	  - remove apply_gkrelluim_config
-	           save_gkrelluim_config
+	  - remove command[]
+	           apply_gkrelluim_config
+		   save_gkrelluim_config
 		   load_gkrelluim_config
-	  - sync _CommandEntry svn3105
-	  - modify cb_menu_button
+	  - modify exec_command
+	           cb_menu_button
+		   create_gkrelluim
+		   create_gkrelluim_tab
+		   plugin_gkrelluim
 	* uim-helper.c
-	  - add OBJECT_DATA_IM_BUTTON
-	        im_menu_activate
-		create_im_menu (popup_im_menu)
+	  - add _CommandEntry
+	        get_command_entry_desc
+		get_command_entry_command
+		get_command_entry_custom_button_show_symbol
+		helper_toolbar_check_custom
+		safe_gettext
+		has_n_strs
 		prop_menu_activate
 		create_prop_menu (popup_prop_menu)
+		create_mode_menu
+		create_input_menu
+		create_im_menu
 		list_data_free
 		prop_data_flush
-		prop_button_append_menu
-		uim_toolbar_get_im_list
+		mode_data_flush
+		input_data_flush
 		im_data_flush
+		prop_button_append_menu
 		im_button_append_menu
-		helper_toolbar_im_list_update
+		mode_button_append_menu
+		input_button_append_menu
+		is_icon_registered
+		register_icon
+		init_icon
 		helper_init
-	  - sync svn3105 get_charset
-	                 convert_charset
-			 helper_toolbar_prop_list_update
-			 helper_toolbar_prop_label_update
-			 helper_toolbar_parse_helper_str
-			 fd_read_cb
-			 uim_toolbar_check_helper_connection
-	* gkrelluim.h
-	  - new file
+	  - sync svn get_charset
+	             convert_charset
+		     helper_toolbar_prop_list_update
+		     helper_toolbar_prop_label_update
+		     uim_toolbar_get_im_list
+		     helper_toolbar_parse_helper_str
+		     fd_read_cb
+		     uim_toolbar_check_helper_connection
 	* ja.po
 	  - update
 
