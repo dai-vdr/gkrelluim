@@ -236,7 +236,7 @@ prop_menu_activate(GtkMenu *menu_item, gpointer data)
 }
 
 /*
- * taken from uim-svn3135/helper/toolbar-common-gtk.c
+ * taken from uim-svn3485/helper/toolbar-common-gtk.c
  * modified for GKrellUIM
  */
 static void
@@ -245,14 +245,13 @@ create_prop_menu(GtkWidget *prop_menu, GtkWidget *widget, const gint type)
 {
   GtkWidget *menu_item, *hbox, *label, *img;
   GtkTooltips *tooltip;
-  GList *menu_item_list, *icon_list, *label_list, *tooltip_list, *action_list, *state_list;
+  GList *menu_item_list, *icon_list, *label_list, *tooltip_list, *action_list,
+        *state_list /* GKrellUIM: *list */;
   int i, selected = -1;
 
-  /* GKrellUIM */
   uim_toolbar_check_helper_connection(widget);
 
   menu_item_list = gtk_container_get_children(GTK_CONTAINER(prop_menu));
-
   /* GKrellUIM */
   icon_list    = g_object_get_data(G_OBJECT(widget), prop_icon   [type]);
   label_list   = g_object_get_data(G_OBJECT(widget), prop_label  [type]);
@@ -283,16 +282,13 @@ create_prop_menu(GtkWidget *prop_menu, GtkWidget *widget, const gint type)
       gtk_check_menu_item_set_draw_as_radio(GTK_CHECK_MENU_ITEM(menu_item),
                                             TRUE);
 #endif
-      /* GKrellUIM */
-      if (type == TYPE_IM) {
-        if (register_icon(icon_list->data))
-          img = gtk_image_new_from_stock(icon_list->data, GTK_ICON_SIZE_MENU);
-         else
-          img = gtk_image_new_from_stock("null", GTK_ICON_SIZE_MENU);
-        if (img) {
-          gtk_box_pack_start(GTK_BOX(hbox), img, FALSE, FALSE, 3);
-          gtk_widget_show(img);
-        }
+      if (register_icon(icon_list->data))
+        img = gtk_image_new_from_stock(icon_list->data, GTK_ICON_SIZE_MENU);
+       else
+        img = gtk_image_new_from_stock("null", GTK_ICON_SIZE_MENU);
+      if (img) {
+        gtk_box_pack_start(GTK_BOX(hbox), img, FALSE, FALSE, 3);
+        gtk_widget_show(img);
       }
       gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 3);
       gtk_container_add(GTK_CONTAINER(menu_item), hbox);
@@ -525,7 +521,7 @@ helper_toolbar_prop_list_update(GtkWidget *widget, gchar **lines)
   const gchar *action_id, *is_selected;
   /* XXX: remove prop_buttons & tool_buttons */
   /* GKrellUIM */
-  gint branch_number = -1;
+  gint branch_number;
 
   charset = get_charset(lines[1]);
 
@@ -538,6 +534,12 @@ helper_toolbar_prop_list_update(GtkWidget *widget, gchar **lines)
   /* GKrellUIM */
   mode_text  = g_strdup( "?" );
   input_text = g_strdup( "-" );
+
+  /* GKrellUIM */
+  if( uim_scm_symbol_value_bool("toolbar-show-action-based-switcher-button?") )
+    branch_number = -1;
+  else
+    branch_number = 0;
 
   for (i = 0; lines[i] && strcmp("", lines[i]); i++) {
     gchar *utf8_str = convert_charset(charset, lines[i]);
