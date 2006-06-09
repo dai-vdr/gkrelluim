@@ -1,5 +1,6 @@
-2006-05-xx dai <d+gkrelluim@vdr.jp>
+2006-06-09 dai <d+gkrelluim@vdr.jp>
 
+	* Release 0.1.0
 	* gkrelluim.c
 	  - add cb_mode_button
 		cb_input_button
