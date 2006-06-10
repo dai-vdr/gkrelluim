@@ -536,6 +536,7 @@ helper_toolbar_prop_list_update(GtkWidget *widget, gchar **lines)
   input_text = g_strdup( "-" );
 
   /* GKrellUIM */
+  uim_init();
   if( uim_scm_symbol_value_bool("toolbar-show-action-based-switcher-button?") )
     branch_number = -1;
   else

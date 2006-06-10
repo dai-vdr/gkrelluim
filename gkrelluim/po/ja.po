@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gkrelluim 0.0.6\n"
 "Report-Msgid-Bugs-To: d+gkrelluim@vdr.jp\n"
-"POT-Creation-Date: 2006-04-11 20:53+0900\n"
+"POT-Creation-Date: 2006-06-09 19:09+0900\n"
 "PO-Revision-Date: 2006-02-10 17:27+0900\n"
 "Last-Translator: dai <d+gkrelluim@vdr.jp>\n"
 "Language-Team: ja <ja@li.org>\n"
@@ -40,23 +40,29 @@ msgstr ""
 msgid "About"
 msgstr "GKrellUIM について"
 
-#~ msgid "Switch input method"
-#~ msgstr "入力方式の切り替え"
+#: src/uim-helper.c:98
+msgid "Switch input method"
+msgstr "入力方式の切り替え"
 
-#~ msgid "Preference"
-#~ msgstr "設定ツール"
+#: src/uim-helper.c:107
+msgid "Preference"
+msgstr "設定ツール"
 
-#~ msgid "Japanese dictionary editor"
-#~ msgstr "日本語辞書ツール"
+#: src/uim-helper.c:116
+msgid "Japanese dictionary editor"
+msgstr "日本語辞書ツール"
 
-#~ msgid "Input pad"
-#~ msgstr "入力パッド"
+#: src/uim-helper.c:125
+msgid "Input pad"
+msgstr "入力パッド"
 
-#~ msgid "Handwriting input pad"
-#~ msgstr "手書き入力パッド"
+#: src/uim-helper.c:134
+msgid "Handwriting input pad"
+msgstr "手書き入力パッド"
 
-#~ msgid "Help"
-#~ msgstr "ヘルプ"
+#: src/uim-helper.c:143
+msgid "Help"
+msgstr "ヘルプ"
 
 #~ msgid "im-switcher"
 #~ msgstr "入力方式の切り替え"
