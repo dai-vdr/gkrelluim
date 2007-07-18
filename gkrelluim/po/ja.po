@@ -1,83 +1,83 @@
-# GKrellUIM: GKrellM UIM helper Plugin
-# Copyright (C) 2005 dai <d+gkrelluim@vdr.jp>
+# GKrellUIM: GKrellM uim helper Plugin
+# Copyright (C) 2004-2007 dai <d+gkrelluim@vdr.jp>
 # This file is distributed under the same license as the gkrelluim package.
-# dai <d+gkrelluim@vdr.jp>, 2005.
+# dai <d+gkrelluim@vdr.jp>, 2004-2007.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: gkrelluim 0.0.6\n"
 "Report-Msgid-Bugs-To: d+gkrelluim@vdr.jp\n"
-"POT-Creation-Date: 2006-06-09 19:09+0900\n"
-"PO-Revision-Date: 2006-02-10 17:27+0900\n"
-"Last-Translator: dai <d+gkrelluim@vdr.jp>\n"
+"POT-Creation-Date: 2007-07-18 14:26+0900\n"
+"PO-Revision-Date: 2007-07-18 14:28+0900\n"
+"Last-Translator: dai <d+po@vdr.jp>\n"
 "Language-Team: ja <ja@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=EUC-JP\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/gkrelluim.c:271
+#: src/gkrelluim.c:245
 #, c-format
 msgid ""
 "GKrellUIM %s\n"
-"GKrellM UIM helper Plugin\n"
+"GKrellM uim helper Plugin\n"
 "\n"
-"Copyright (C) 2004-2006 dai\n"
+"Copyright (C) 2004-2007 dai\n"
 "d+gkrelluim@vdr.jp\n"
 "http://vdr.jp/d/gkrelluim.html\n"
 "\n"
 "Released under the GNU General Public License\n"
 msgstr ""
 "GKrellUIM %s\n"
-"GKrellM UIM ¥Ø¥ë¥Ñ¡¼¥×¥é¥°¥¤¥ó\n"
+"GKrellM uim ãƒ˜ãƒ«ãƒ‘ãƒ¼ãƒ—ãƒ©ã‚°ã‚¤ãƒ³\n"
 "\n"
-"Copyright (C) 2004-2006 dai\n"
+"Copyright (C) 2004-2007 dai\n"
 "d+gkrelluim@vdr.jp\n"
 "http://vdr.jp/d/gkrelluim.html\n"
 "\n"
-"GNU General Public License ¤Î¤â¤È¤Ë¥ê¥ê¡¼¥¹¤µ¤ì¤Æ¤¤¤Ş¤¹\n"
+"GNU General Public License ã®ã‚‚ã¨ã«ãƒªãƒªãƒ¼ã‚¹ã•ã‚Œã¦ã„ã¾ã™\n"
 
-#: src/gkrelluim.c:279
+#: src/gkrelluim.c:253
 msgid "About"
-msgstr "GKrellUIM ¤Ë¤Ä¤¤¤Æ"
+msgstr "GKrellUIM ã«ã¤ã„ã¦"
 
-#: src/uim-helper.c:98
+#: src/uim-helper.c:65
 msgid "Switch input method"
-msgstr "ÆşÎÏÊı¼°¤ÎÀÚ¤êÂØ¤¨"
+msgstr "å…¥åŠ›æ–¹å¼ã®åˆ‡ã‚Šæ›¿ãˆ"
 
-#: src/uim-helper.c:107
+#: src/uim-helper.c:74
 msgid "Preference"
-msgstr "ÀßÄê¥Ä¡¼¥ë"
+msgstr "è¨­å®šãƒ„ãƒ¼ãƒ«"
 
-#: src/uim-helper.c:116
+#: src/uim-helper.c:83
 msgid "Japanese dictionary editor"
-msgstr "ÆüËÜ¸ì¼­½ñ¥Ä¡¼¥ë"
+msgstr "æ—¥æœ¬èªè¾æ›¸ãƒ„ãƒ¼ãƒ«"
 
-#: src/uim-helper.c:125
+#: src/uim-helper.c:92
 msgid "Input pad"
-msgstr "ÆşÎÏ¥Ñ¥Ã¥É"
+msgstr "å…¥åŠ›ãƒ‘ãƒƒãƒ‰"
 
-#: src/uim-helper.c:134
+#: src/uim-helper.c:101
 msgid "Handwriting input pad"
-msgstr "¼ê½ñ¤­ÆşÎÏ¥Ñ¥Ã¥É"
+msgstr "æ‰‹æ›¸ãå…¥åŠ›ãƒ‘ãƒƒãƒ‰"
 
-#: src/uim-helper.c:143
+#: src/uim-helper.c:110
 msgid "Help"
-msgstr "¥Ø¥ë¥×"
+msgstr "ãƒ˜ãƒ«ãƒ—"
 
 #~ msgid "im-switcher"
-#~ msgstr "ÆşÎÏÊı¼°¤ÎÀÚ¤êÂØ¤¨"
+#~ msgstr "å…¥åŠ›æ–¹å¼ã®åˆ‡ã‚Šæ›¿ãˆ"
 
 #~ msgid "pref"
-#~ msgstr "ÀßÄê¥Ä¡¼¥ë"
+#~ msgstr "è¨­å®šãƒ„ãƒ¼ãƒ«"
 
 #~ msgid "dict"
-#~ msgstr "ÆüËÜ¸ì¼­½ñ¥Ä¡¼¥ë"
+#~ msgstr "æ—¥æœ¬èªè¾æ›¸ãƒ„ãƒ¼ãƒ«"
 
 #~ msgid "hand"
-#~ msgstr "¼ê½ñ¤­ÆşÎÏ¥Ñ¥Ã¥É"
+#~ msgstr "æ‰‹æ›¸ãå…¥åŠ›ãƒ‘ãƒƒãƒ‰"
 
 #~ msgid "%s Executable:"
-#~ msgstr "%s¤Î¼Â¹Ô¥Õ¥¡¥¤¥ë:"
+#~ msgstr "%sã®å®Ÿè¡Œãƒ•ã‚¡ã‚¤ãƒ«:"
 
 #~ msgid "Config"
-#~ msgstr "¥³¥ó¥Õ¥£¥°"
+#~ msgstr "ã‚³ãƒ³ãƒ•ã‚£ã‚°"
