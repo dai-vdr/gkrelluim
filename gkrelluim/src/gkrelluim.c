@@ -19,26 +19,14 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 */
 
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
+#include "gkrelluim.h"
+#include "uim-helper.h"
 
 /* GKrellM */
-#define PACKAGE        "gkrelluim"
-#define CONFIG_KEYWORD PACKAGE
-#define STYLE_NAME     PACKAGE
-
-#include <gkrellm2/gkrellm.h>
 static GkrellmMonitor *monitor;
 static GkrellmPanel   *panel;
 static GkrellmDecal   *decal;
 static gint style_id;
-
-/* UIM */
-#include <uim/uim.h>
-#define OBJECT_DATA_IM_BUTTON "IM_BUTTON"
-extern int uim_fd;
-extern uint command_entry_len;
 
 /* GKrellUIM */
 static GkrellmDecal *text_decal;
@@ -47,16 +35,10 @@ static GkrellmDecal *input_text_decal;
 gchar *mode_text  = "?";
 gchar *input_text = "-";
 
-void create_im_menu(GtkWidget*, GtkWidget*);
-void create_mode_menu(GtkWidget*, GtkWidget*);
-void create_input_menu(GtkWidget*, GtkWidget*);
-void helper_init(GtkWidget*);
-
 /*
  * taken from gkrellm2-demos/demo2.c
  */
-static gint
-panel_expose_event( GtkWidget *widget, GdkEventExpose *ev ) {
+static gint panel_expose_event( GtkWidget *widget, GdkEventExpose *ev ) {
   gdk_draw_pixmap( widget->window,
     widget->style->fg_gc[ GTK_WIDGET_STATE( widget ) ],
     panel->pixmap, ev->area.x, ev->area.y, ev->area.x, ev->area.y,
@@ -68,8 +50,7 @@ panel_expose_event( GtkWidget *widget, GdkEventExpose *ev ) {
  * taken from gkrellm2-demos/demo2.c, gkrellmms/gkrellmms.c
  * modified for GKrellUIM
  */
-static void
-update_gkrelluim( void ) {
+static void update_gkrelluim( void ) {
   /* GKrellUIM */
   gchar *mode_label  = NULL;
   gchar *input_label = NULL;
@@ -90,8 +71,7 @@ update_gkrelluim( void ) {
  * taken from gkrellm2-demos/demo3.c, gkrellmms/options.c
  * modified for GKrellUIM
  */
-static void
-exec_command( gint data ) {
+static void exec_command( gint data ) {
   gchar  **argv = 0;
   GError  *err  = NULL;
   gboolean res;
@@ -113,8 +93,7 @@ exec_command( gint data ) {
 /*
  * GKrellUIM (gtk+-2.0.x-tut/sec-manualmenuexample.html)
  */
-static void
-cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
+static void cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
   GtkWidget *menu      = gtk_menu_new();
   GtkWidget *separator = gtk_separator_menu_item_new();
   GtkWidget *item[ command_entry_len ];
@@ -145,8 +124,7 @@ cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
                   event->button, gtk_get_current_event_time() );
 }
 
-static void
-cb_mode_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
+static void cb_mode_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
   GtkWidget *menu = gtk_menu_new();
 
   create_mode_menu( menu, GTK_WIDGET(event) );
@@ -156,8 +134,7 @@ cb_mode_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
                   event->button, gtk_get_current_event_time() );
 }
 
-static void
-cb_input_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
+static void cb_input_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
   GtkWidget *menu = gtk_menu_new();
 
   create_input_menu( menu, GTK_WIDGET(event) );
@@ -171,8 +148,7 @@ cb_input_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
  * taken from gkrellm2-demos/demo[234].c
  * modified for GKrellUIM
  */
-static void
-create_gkrelluim( GtkWidget *vbox, gint first_create ) {
+static void create_gkrelluim( GtkWidget *vbox, gint first_create ) {
   GkrellmStyle     *style;
   GkrellmTextstyle *text_style;
 
@@ -190,8 +166,7 @@ create_gkrelluim( GtkWidget *vbox, gint first_create ) {
   /* GKrellUIM */
   text_style = gkrellm_meter_textstyle( style_id );
   text_style_alt = gkrellm_meter_alt_textstyle( style_id );
-  decal = gkrellm_create_decal_text( panel, "Aq", text_style, style,
-                                     -1, -1, -1);
+  decal = gkrellm_create_decal_text( panel, "Aq", text_style, style, -1, -1, -1 );
 
   /* gkrellm2-demos/demo2.c */
   text_decal = gkrellm_create_decal_text( panel, "Aq", text_style_alt, style,
@@ -255,8 +230,7 @@ create_gkrelluim( GtkWidget *vbox, gint first_create ) {
  * taken from alltraxclock.c, gkrellmms/options,c
  * modified for GKrellUIM
  */
-static void
-create_gkrelluim_tab( GtkWidget *tab_vbox ) {
+static void create_gkrelluim_tab( GtkWidget *tab_vbox ) {
   GtkWidget *tabs, *text;
 
   GtkWidget *label;
@@ -319,3 +293,7 @@ GkrellmMonitor *gkrellm_init_plugin( void ) {
 
   return &plugin_gkrelluim;
 }
+
+/*
+ * [EOF]
+ */

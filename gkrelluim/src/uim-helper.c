@@ -1,7 +1,7 @@
 /*
   GKrellUIM uim-helper
 
-  Copyright (C) 2004-2006 dai <d+gkrelluim@vdr.jp>
+  Copyright (C) 2004-2007 dai <d+gkrelluim@vdr.jp>
   All rights reserved.
 
   Original Author: uim Project http://uim.freedesktop.org/
@@ -38,56 +38,23 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifdef HAVE_CONFIG_H
-#  include "config.h"
-#endif
-
-/* GTK+ */
-#include <gtk/gtk.h>
+#include "gkrelluim.h"
+#include "uim-helper.h"
 
 /* UIM */
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <uim/uim.h>
-#include <uim/uim-helper.h>
 static unsigned int read_tag;
 /* GKrellUIM: static */ int uim_fd;
 static GtkIconFactory *uim_factory;
 static GList *uim_icon_list;
 
-static gboolean register_icon(const gchar *name);
+static gboolean register_icon( const gchar* );
 
 /* GKrellUIM */
-#include <gkrellm2/gkrellm.h>
-extern gchar *mode_text;
-extern gchar *input_text;
-
 const gchar *prop_icon[]    = { "im_icon",    "mode_icon",    "input_icon"    };
 const gchar *prop_label[]   = { "im_label",   "mode_label",   "input_label"   };
 const gchar *prop_tooltip[] = { "im_tooltip", "mode_tooltip", "input_tooltip" };
 const gchar *prop_action[]  = { "im_action",  "mode_action",  "input_action"  };
 const gchar *prop_state[]   = { "im_state",   "mode_state",   "input_state"   };
-
-enum {
-  TYPE_IM=0,
-  TYPE_MODE=1,
-  TYPE_INPUT=2
-};
-
-void uim_toolbar_check_helper_connection(GtkWidget*);
-
-/*
- * taken from uim-svn3109/helper/toolbar-common-gtk.c
- */
-struct _CommandEntry {
-  const gchar *desc;
-  const gchar *label;
-  const gchar *icon;
-  const gchar *command;
-  const gchar *custom_button_show_symbol;
-  uim_bool show_button;
-};
 
 /*
  * taken from uim-svn3109/helper/toolbar-common-gtk.c
@@ -152,20 +119,17 @@ static struct _CommandEntry command_entry[] = {
 /* GKrellUIM: static */ guint command_entry_len = sizeof(command_entry) / sizeof(struct _CommandEntry);
 
 /* GKrellUIM */
-const gchar *
-get_command_entry_desc( gint data ) {
+const gchar *get_command_entry_desc( gint data ) {
   return command_entry[ data ].desc;
 }
 
 /* GKrellUIM */
-const gchar *
-get_command_entry_command( gint data ) {
+const gchar *get_command_entry_command( gint data ) {
   return command_entry[ data ].command;
 }
 
 /* GKrellUIM */
-const gchar *
-get_command_entry_custom_button_show_symbol( gint data ) {
+const gchar *get_command_entry_custom_button_show_symbol( gint data ) {
   return command_entry[ data ].custom_button_show_symbol;
 }
 
@@ -173,9 +137,7 @@ get_command_entry_custom_button_show_symbol( gint data ) {
  * taken from uim-svn3110/helper/toolbar-common-gtk.c
  * modified for GKrellUIM
  */
-static void
-helper_toolbar_check_custom()
-{
+static void helper_toolbar_check_custom( void ) {
   guint i;
 
   /* GKrellUIM */
@@ -189,9 +151,7 @@ helper_toolbar_check_custom()
 /*
  * taken from uim-svn3144/helper/toolbar-common-gtk.c
  */
-static const char *
-safe_gettext(const char *msgid)
-{ 
+static const char *safe_gettext( const char *msgid ) { 
   const char *p;
 
   for (p = msgid; *p && isascii(*p); p++)
@@ -203,9 +163,7 @@ safe_gettext(const char *msgid)
 /*
  * taken from uim-svn3144/helper/toolbar-common-gtk.c
  */
-static gboolean
-has_n_strs(gchar **str_list, guint n)
-{
+static gboolean has_n_strs( gchar **str_list, guint n ) {
   guint i;
 
   if (!str_list)
@@ -222,9 +180,7 @@ has_n_strs(gchar **str_list, guint n)
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
-static void
-prop_menu_activate(GtkMenu *menu_item, gpointer data)
-{
+static void prop_menu_activate( GtkMenu *menu_item, gpointer data ) {
   GString *msg;
 
   msg = g_string_new((gchar *)g_object_get_data(G_OBJECT(menu_item),
@@ -236,13 +192,11 @@ prop_menu_activate(GtkMenu *menu_item, gpointer data)
 }
 
 /*
- * taken from uim-svn3485/helper/toolbar-common-gtk.c
+ * taken from uim-svn3485/helper/toolbar-common-gtk.c#popup_prop_menu
  * modified for GKrellUIM
  */
-static void
-/* GKrellUIM: popup_prop_menu */
-create_prop_menu(GtkWidget *prop_menu, GtkWidget *widget, const gint type)
-{
+static void create_prop_menu( GtkWidget *prop_menu, GtkWidget *widget,
+                              const gint type ) {
   GtkWidget *menu_item, *hbox, *label, *img;
   GtkTooltips *tooltip;
   GList *menu_item_list, *icon_list, *label_list, *tooltip_list, *action_list,
@@ -325,29 +279,24 @@ create_prop_menu(GtkWidget *prop_menu, GtkWidget *widget, const gint type)
 }
 
 /* GKrellUIM */
-void
-create_mode_menu( GtkWidget *menu, GtkWidget *event ) {
+void create_mode_menu( GtkWidget *menu, GtkWidget *event ) {
   create_prop_menu( menu, event, TYPE_MODE );
 }
 
 /* GKrellUIM */
-void
-create_input_menu( GtkWidget *menu, GtkWidget *event ) {
+void create_input_menu( GtkWidget *menu, GtkWidget *event ) {
   create_prop_menu( menu, event, TYPE_INPUT );
 }
 
 /* GKrellUIM */
-void
-create_im_menu( GtkWidget *menu, GtkWidget *event ) {
+void create_im_menu( GtkWidget *menu, GtkWidget *event ) {
   create_prop_menu( menu, event, TYPE_IM );
 }
 
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
-static void
-list_data_free(GList *list)
-{
+static void list_data_free( GList *list ) {
   g_list_foreach(list, (GFunc)g_free, NULL);
   g_list_free(list);
 }
@@ -356,9 +305,7 @@ list_data_free(GList *list)
  * taken from uim-svn3135/helper/toolbar-common-gtk.c
  * modified for GKrellUIM
  */
-static void
-prop_data_flush(gpointer data, const gint type)
-{
+static void prop_data_flush( gpointer data, const gint type ) {
   GList *list;
   /* GKrellUIM */
   list = g_object_get_data(data, prop_icon   [type]);
@@ -381,36 +328,28 @@ prop_data_flush(gpointer data, const gint type)
 }
 
 /* GKrellUIM */
-static void
-mode_data_flush(gpointer data)
-{
-  prop_data_flush(data,TYPE_MODE);
+static void mode_data_flush( gpointer data ) {
+  prop_data_flush( data, TYPE_MODE );
 }
 
 /* GKrellUIM */
-static void
-input_data_flush(gpointer data)
-{
-  prop_data_flush(data,TYPE_INPUT);
+static void input_data_flush( gpointer data ) {
+  prop_data_flush( data, TYPE_INPUT );
 }
 
 /* GKrellUIM */
-static void
-im_data_flush(gpointer data)
-{
-  prop_data_flush(data,TYPE_IM);
+static void im_data_flush( gpointer data ) {
+  prop_data_flush( data, TYPE_IM );
 }
 
 /*
  * taken from uim-svn3135/helper/toolbar-common-gtk.c
  * modified for GKrellUIM
  */
-static void
-prop_button_append_menu(GtkWidget *button, const gint type,
-                        const gchar *icon_name,
-                        const gchar *label, const gchar *tooltip,
-                        const gchar *action, const gchar *state)
-{
+static void prop_button_append_menu( GtkWidget *button, const gint type,
+                                    const gchar *icon_name,
+                                    const gchar *label, const gchar *tooltip,
+                                    const gchar *action, const gchar *state ) {
   GList *icon_list, *label_list, *tooltip_list, *action_list, *state_list;
 
   /* GKrellUIM */
@@ -435,12 +374,10 @@ prop_button_append_menu(GtkWidget *button, const gint type,
 }
 
 /* GKrellUIM */
-static void
-im_button_append_menu(GtkWidget *button,
-                      const gchar *icon_name,
-                      const gchar *label, const gchar *tooltip,
-                      const gchar *action, const gchar *state)
-{
+static void im_button_append_menu( GtkWidget *button,
+                                   const gchar *icon_name,
+                                   const gchar *label, const gchar *tooltip,
+                                   const gchar *action, const gchar *state ) {
   prop_button_append_menu( button, TYPE_IM,
                            icon_name,
                            label, tooltip,
@@ -448,12 +385,10 @@ im_button_append_menu(GtkWidget *button,
 }
 
 /* GKrellUIM */
-static void
-mode_button_append_menu(GtkWidget *button,
-                        const gchar *icon_name,
-                        const gchar *label, const gchar *tooltip,
-                        const gchar *action, const gchar *state)
-{
+static void mode_button_append_menu( GtkWidget *button,
+                                     const gchar *icon_name,
+                                     const gchar *label, const gchar *tooltip,
+                                     const gchar *action, const gchar *state ) {
   prop_button_append_menu( button, TYPE_MODE,
                            icon_name,
                            label, tooltip,
@@ -461,12 +396,10 @@ mode_button_append_menu(GtkWidget *button,
 }
 
 /* GKrellUIM */
-static void
-input_button_append_menu(GtkWidget *button,
-                        const gchar *icon_name,
-                        const gchar *label, const gchar *tooltip,
-                        const gchar *action, const gchar *state)
-{
+static void input_button_append_menu( GtkWidget *button,
+                                      const gchar *icon_name,
+                                      const gchar *label, const gchar *tooltip,
+                                      const gchar *action, const gchar *state ) {
   prop_button_append_menu( button, TYPE_INPUT,
                            icon_name,
                            label, tooltip,
@@ -476,9 +409,7 @@ input_button_append_menu(GtkWidget *button,
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
-static gchar *
-get_charset(gchar *line)
-{
+static gchar *get_charset( gchar *line ) {
   gchar **tokens;
   gchar *charset = NULL;
 
@@ -493,9 +424,7 @@ get_charset(gchar *line)
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
-static gchar *
-convert_charset(const gchar *charset, const gchar *str)
-{
+static gchar *convert_charset( const gchar *charset, const gchar *str ) {
   if (!charset)
     return NULL;
 
@@ -510,9 +439,7 @@ convert_charset(const gchar *charset, const gchar *str)
  * taken from uim-svn3144/helper/toolbar-common-gtk.c
  * modified for GKrellUIM
  */
-static void
-helper_toolbar_prop_list_update(GtkWidget *widget, gchar **lines)
-{
+static void helper_toolbar_prop_list_update( GtkWidget *widget, gchar **lines ) {
   /* XXX: remove button */
   int i;
   gchar **cols;
@@ -612,9 +539,7 @@ helper_toolbar_prop_list_update(GtkWidget *widget, gchar **lines)
  * taken from uim-svn3144/helper/toolbar-common-gtk.c
  * modified for GKrellUIM
  */
-static void
-helper_toolbar_prop_label_update(GtkWidget *widget, gchar **lines)
-{
+static void helper_toolbar_prop_label_update( GtkWidget *widget, gchar **lines ) {
   /* XXX: remove button */
   unsigned int i;
   gchar **cols;
@@ -667,9 +592,7 @@ helper_toolbar_prop_label_update(GtkWidget *widget, gchar **lines)
 /*
  * taken from uim-0.4.6beta2/helper/toolbar-common-gtk.c
  */
-static void
-helper_disconnect_cb(void)
-{
+static void helper_disconnect_cb( void ) {
   uim_fd = -1;
   g_source_remove(read_tag);
 }
@@ -677,18 +600,14 @@ helper_disconnect_cb(void)
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
-void
-uim_toolbar_get_im_list(void)
-{
+static void uim_toolbar_get_im_list( void ) {
   uim_helper_send_message(uim_fd, "im_list_get\n");
 }
 
 /*
  * taken from uim-svn3121/helper/toolbar-common-gtk.c
  */
-static void
-helper_toolbar_parse_helper_str(GtkWidget *widget, gchar *str)
-{
+static void helper_toolbar_parse_helper_str( GtkWidget *widget, gchar *str ) {
   gchar **lines;
   lines = g_strsplit(str, "\n", 0);
 
@@ -708,9 +627,7 @@ helper_toolbar_parse_helper_str(GtkWidget *widget, gchar *str)
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
-static gboolean
-fd_read_cb(GIOChannel *channel, GIOCondition c, gpointer p)
-{
+static gboolean fd_read_cb( GIOChannel *channel, GIOCondition c, gpointer p ) {
   gchar *msg;
   int fd = g_io_channel_unix_get_fd(channel);
   GtkWidget *widget = GTK_WIDGET(p);
@@ -729,9 +646,7 @@ fd_read_cb(GIOChannel *channel, GIOCondition c, gpointer p)
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
-void
-uim_toolbar_check_helper_connection(GtkWidget *widget)
-{
+void uim_toolbar_check_helper_connection( GtkWidget *widget ) {
   if (uim_fd < 0) {
     uim_fd = uim_helper_init_client_fd(helper_disconnect_cb);
     if (uim_fd > 0) {
@@ -747,9 +662,7 @@ uim_toolbar_check_helper_connection(GtkWidget *widget)
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
-static gboolean
-is_icon_registered(const gchar *name)
-{
+static gboolean is_icon_registered( const gchar *name ) {
   GList *list;
 
   list = uim_icon_list;
@@ -765,9 +678,7 @@ is_icon_registered(const gchar *name)
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
-static gboolean
-register_icon(const gchar *name)
-{
+static gboolean register_icon( const gchar *name ) {
   GtkIconSet *icon_set;
   GdkPixbuf *pixbuf;
   GString *filename;
@@ -802,9 +713,7 @@ register_icon(const gchar *name)
 /*
  * taken from uim-svn3105/helper/toolbar-common-gtk.c
  */
-static void
-init_icon(void)
-{
+static void init_icon( void ) {
   if (uim_factory)
     return;
 
@@ -817,8 +726,7 @@ init_icon(void)
 }
 
 /* GKrellUIM */
-void helper_init(GtkWidget *widget )
-{
+void helper_init( GtkWidget *widget ) {
   init_icon();
 
   helper_toolbar_check_custom();
@@ -831,3 +739,7 @@ void helper_init(GtkWidget *widget )
 
   g_atexit( uim_quit );
 }
+
+/*
+ * [EOF]
+ */
