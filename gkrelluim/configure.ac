@@ -3,7 +3,7 @@
 
 AC_PREREQ(2.59)
 
-AC_INIT([gkrelluim], 0.1.1, [d+gkrelluim@vdr.jp])
+AC_INIT([gkrelluim], 0.1.2, [d+gkrelluim@vdr.jp])
 AM_INIT_AUTOMAKE($PACKAGE_NAME, $PACKAGE_VERSION, no-define)
 
 AC_CONFIG_SRCDIR([src/gkrelluim.c],[src/uim-helper.c])

@@ -41,7 +41,7 @@
 #include "gkrelluim.h"
 #include "uim-helper.h"
 
-/* UIM */
+/* uim */
 static unsigned int read_tag;
 /* GKrellUIM: static */ int uim_fd;
 static GtkIconFactory *uim_factory;

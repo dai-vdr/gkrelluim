@@ -1,5 +1,5 @@
 /*
-  GKrellUIM: GKrellM UIM helper Plugin
+  GKrellUIM: GKrellM uim helper Plugin
 
   Copyright (C) 2004-2007 dai <d+gkrelluim@vdr.jp>
   All rights reserved.

@@ -1,5 +1,5 @@
 /*
-  GKrellUIM: GKrellM UIM helper Plugin
+  GKrellUIM: GKrellM uim helper Plugin
 
   Copyright (C) 2004-2006 dai <d+gkrelluim@vdr.jp>
   All rights reserved.
@@ -243,8 +243,8 @@ static void create_gkrelluim_tab( GtkWidget *tab_vbox ) {
   /* About tab */
   label_text = g_strdup_printf(
 	_("GKrellUIM %s\n"
-	"GKrellM UIM helper Plugin\n\n"
-	"Copyright (C) 2004-2006 dai\n"
+	"GKrellM uim helper Plugin\n\n"
+	"Copyright (C) 2004-2007 dai\n"
 	"d+gkrelluim@vdr.jp\n"
 	"http://vdr.jp/d/gkrelluim.html\n\n"
 	"Released under the GNU General Public License\n"), PACKAGE_VERSION );
