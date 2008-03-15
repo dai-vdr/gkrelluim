@@ -1,7 +1,7 @@
 /*
   GKrellUIM: GKrellM uim helper Plugin
 
-  Copyright (C) 2004-2006 dai <d+gkrelluim@vdr.jp>
+  Copyright (C) 2004-2008 dai <d+gkrelluim@vdr.jp>
   All rights reserved.
 
   This program is free software; you can redistribute it and/or modify
@@ -92,11 +92,14 @@ static void exec_command( gint data ) {
 
 /*
  * GKrellUIM (gtk+-2.0.x-tut/sec-manualmenuexample.html)
+ * taken from uim-1.4.2/helper/toolbar-common-gtk.c#right_click_menu_create
+ * modified for GKrellUIM
  */
 static void cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) {
   GtkWidget *menu      = gtk_menu_new();
   GtkWidget *separator = gtk_separator_menu_item_new();
   GtkWidget *item[ command_entry_len ];
+  GtkWidget *img;
   gint       i;
 
   uim_init();
@@ -109,8 +112,14 @@ static void cb_menu_button( GkrellmDecalbutton *button, GdkEventButton *event ) 
   for( i = 0; i < command_entry_len; i++ ) {
     if( uim_scm_symbol_value_bool(
           get_command_entry_custom_button_show_symbol( i ) ) ) {
-      item[ i ] = gtk_menu_item_new_with_label(
+      item[ i ] = gtk_image_menu_item_new_with_label(
                     _( (const char*)get_command_entry_desc( i )) );
+      if ( (const char*)get_command_entry_icon( i ) ) {
+        img = gtk_image_new_from_stock(
+                (const char*)get_command_entry_icon( i ), GTK_ICON_SIZE_MENU);
+        if (img)
+          gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item[ i ]), img);
+      }
       gtk_menu_shell_append( GTK_MENU_SHELL( menu ), item[ i ] );
       g_signal_connect_swapped( G_OBJECT( item[ i ] ), "activate",
                                 G_CALLBACK( exec_command ),
@@ -244,7 +253,7 @@ static void create_gkrelluim_tab( GtkWidget *tab_vbox ) {
   label_text = g_strdup_printf(
 	_("GKrellUIM %s\n"
 	"GKrellM uim helper Plugin\n\n"
-	"Copyright (C) 2004-2007 dai\n"
+	"Copyright (C) 2004-2008 dai\n"
 	"d+gkrelluim@vdr.jp\n"
 	"http://vdr.jp/d/gkrelluim.html\n\n"
 	"Released under the GNU General Public License\n"), PACKAGE_VERSION );

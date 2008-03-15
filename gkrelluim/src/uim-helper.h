@@ -1,10 +1,10 @@
 /*
   GKrellUIM uim-helper
 
-  Copyright (C) 2004-2007 dai <d+gkrelluim@vdr.jp>
+  Copyright (C) 2004-2008 dai <d+gkrelluim@vdr.jp>
   All rights reserved.
 
-  Original Author: uim Project http://uim.freedesktop.org/
+  Original Author: uim Project http://code.google.com/p/uim/
   Modifier: dai <d+gkrelluim@vdr.jp>
 
   Redistribution and use in source and binary forms, with or
@@ -78,6 +78,7 @@ void uim_toolbar_check_helper_connection( GtkWidget* );
 
 const gchar *get_command_entry_desc( gint );
 const gchar *get_command_entry_command( gint );
+const gchar *get_command_entry_icon( gint );
 const gchar *get_command_entry_custom_button_show_symbol( gint );
 
 void create_im_menu( GtkWidget*, GtkWidget* );

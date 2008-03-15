@@ -1,10 +1,10 @@
 /*
   GKrellUIM uim-helper
 
-  Copyright (C) 2004-2007 dai <d+gkrelluim@vdr.jp>
+  Copyright (C) 2004-2008 dai <d+gkrelluim@vdr.jp>
   All rights reserved.
 
-  Original Author: uim Project http://uim.freedesktop.org/
+  Original Author: uim Project http://code.google.com/p/uim/
   Modifier: dai <d+gkrelluim@vdr.jp>
 
   Redistribution and use in source and binary forms, with or
@@ -46,6 +46,7 @@ static unsigned int read_tag;
 /* GKrellUIM: static */ int uim_fd;
 static GtkIconFactory *uim_factory;
 static GList *uim_icon_list;
+static gboolean prop_menu_showing = FALSE;
 
 static gboolean register_icon( const gchar* );
 
@@ -57,14 +58,14 @@ const gchar *prop_action[]  = { "im_action",  "mode_action",  "input_action"  };
 const gchar *prop_state[]   = { "im_state",   "mode_state",   "input_state"   };
 
 /*
- * taken from uim-svn3109/helper/toolbar-common-gtk.c
+ * taken from uim-1.4.2/helper/toolbar-common-gtk.c
  */
 /* FIXME! command menu and buttons should be customizable. */
 static struct _CommandEntry command_entry[] = {
   {
     N_("Switch input method"),
     NULL,
-    "switcher-icon",
+    "im_switcher",
     "uim-im-switcher-gtk &",
     "toolbar-show-switcher-button?",
     UIM_FALSE
@@ -81,8 +82,8 @@ static struct _CommandEntry command_entry[] = {
 
   {
     N_("Japanese dictionary editor"),
-    "Dic",
     NULL,
+    "uim-dict",
     "uim-dict-gtk &",
     "toolbar-show-dict-button?",
     UIM_FALSE
@@ -90,8 +91,8 @@ static struct _CommandEntry command_entry[] = {
 
   {
     N_("Input pad"),
-    "Pad",
     NULL,
+    GTK_STOCK_BOLD,
     "uim-input-pad-ja &",
     "toolbar-show-input-pad-button?",
     UIM_FALSE
@@ -99,8 +100,12 @@ static struct _CommandEntry command_entry[] = {
 
   {
     N_("Handwriting input pad"),
-    "Hand",
+    "H",
+#if GTK_CHECK_VERSION(2, 6, 0)
+    GTK_STOCK_EDIT,
+#else
     NULL,
+#endif
     "uim-tomoe-gtk &",
     "toolbar-show-handwriting-input-pad-button?",
     UIM_FALSE
@@ -126,6 +131,11 @@ const gchar *get_command_entry_desc( gint data ) {
 /* GKrellUIM */
 const gchar *get_command_entry_command( gint data ) {
   return command_entry[ data ].command;
+}
+
+/* GKrellUIM */
+const gchar *get_command_entry_icon( gint data ) {
+  return command_entry[ data ].icon;
 }
 
 /* GKrellUIM */
@@ -192,7 +202,17 @@ static void prop_menu_activate( GtkMenu *menu_item, gpointer data ) {
 }
 
 /*
- * taken from uim-svn3485/helper/toolbar-common-gtk.c#popup_prop_menu
+ * taken from uim-1.4.2/helper/toolbar-common-gtk.c
+ */
+static gboolean prop_menu_shell_deactivate( GtkMenuShell *menu_shell,
+                                            gpointer data ) {
+  prop_menu_showing = FALSE;
+
+  return FALSE;
+}
+
+/*
+ * taken from uim-1.4.2/helper/toolbar-common-gtk.c#popup_prop_menu
  * modified for GKrellUIM
  */
 static void create_prop_menu( GtkWidget *prop_menu, GtkWidget *widget,
@@ -213,7 +233,7 @@ static void create_prop_menu( GtkWidget *prop_menu, GtkWidget *widget,
   action_list  = g_object_get_data(G_OBJECT(widget), prop_action [type]);
   state_list   = g_object_get_data(G_OBJECT(widget), prop_state  [type]);
 
-  /* XXX: remove gtk_widget_destroy */
+  /* XXX: remove gtk_widget_destroy prop_menu */
 
   /* check selected item */
   i = 0;
@@ -276,6 +296,12 @@ static void create_prop_menu( GtkWidget *prop_menu, GtkWidget *widget,
       tooltip_list = tooltip_list->next;
     i++;
   }
+
+  g_signal_connect(G_OBJECT(GTK_MENU_SHELL(prop_menu)), "deactivate",
+                   G_CALLBACK(prop_menu_shell_deactivate), NULL);
+
+  /* XXX: remove gtk_menu_popup */
+  prop_menu_showing = TRUE;
 }
 
 /* GKrellUIM */
@@ -436,7 +462,7 @@ static gchar *convert_charset( const gchar *charset, const gchar *str ) {
 }
 
 /*
- * taken from uim-svn3144/helper/toolbar-common-gtk.c
+ * taken from uim-1.4.2/helper/toolbar-common-gtk.c
  * modified for GKrellUIM
  */
 static void helper_toolbar_prop_list_update( GtkWidget *widget, gchar **lines ) {
@@ -450,9 +476,13 @@ static void helper_toolbar_prop_list_update( GtkWidget *widget, gchar **lines ) 
   /* GKrellUIM */
   gint branch_number;
 
+  if (prop_menu_showing)
+    return;
+
   charset = get_charset(lines[1]);
 
   /* XXX: remove prop_buttons & tool_buttons */
+
   /* GKrellUIM */
   mode_data_flush(widget);
   input_data_flush(widget);
@@ -482,8 +512,8 @@ static void helper_toolbar_prop_list_update( GtkWidget *widget, gchar **lines ) 
     if (cols && cols[0]) {
       if (!strcmp("branch", cols[0]) && has_n_strs(cols, 4)) {
         indication_id = cols[1];
-        iconic_label  = cols[2];
-        tooltip_str   = cols[3];
+        iconic_label  = safe_gettext(cols[2]);
+        tooltip_str   = safe_gettext(cols[3]);
         /* XXX: remove button */
         /* GKrellUIM */
         branch_number++;
@@ -536,60 +566,6 @@ static void helper_toolbar_prop_list_update( GtkWidget *widget, gchar **lines ) 
 }
 
 /*
- * taken from uim-svn3144/helper/toolbar-common-gtk.c
- * modified for GKrellUIM
- */
-static void helper_toolbar_prop_label_update( GtkWidget *widget, gchar **lines ) {
-  /* XXX: remove button */
-  unsigned int i;
-  gchar **cols;
-  gchar *charset, *indication_id, *iconic_label, *tooltip_str;
-  /* XXX: remove prop_buttons */
-
-  for (i = 0; lines[i] && strcmp("", lines[i]); i++)
-    continue;
-
-  /* XXX: remove prop_buttons */
-
-  charset = get_charset(lines[1]);
-
-  /* GKrellUIM */
-  mode_text  = g_strdup( "?" );
-
-  for (i = 2; lines[i] && strcmp("", lines[i]); i++) {
-    if (charset) {
-      gchar *utf8_str;
-      utf8_str = g_convert(lines[i], strlen(lines[i]),
-                           "UTF-8", charset,
-                           NULL, /* gsize *bytes_read */
-                           NULL, /*size *bytes_written */
-                           NULL); /* GError **error*/
-      cols = g_strsplit(utf8_str, "\t", 0);
-      g_free(utf8_str);
-    } else {
-      cols = g_strsplit(lines[i], "\t", 0);
-    }
-
-    if (has_n_strs(cols, 3)) {
-      indication_id = cols[0];
-      iconic_label  = cols[1];
-      tooltip_str   = cols[2];
-      /* XXX: remove prop_buttons */
-
-      /* GKrellUIM */
-      if( i - 2 > 0 ) {
-        ;
-      } else {
-        mode_text = g_strdup( iconic_label );
-      }
-    }
-    g_strfreev(cols);
-  }
-
-  g_free(charset);
-}
-
-/*
  * taken from uim-0.4.6beta2/helper/toolbar-common-gtk.c
  */
 static void helper_disconnect_cb( void ) {
@@ -605,7 +581,7 @@ static void uim_toolbar_get_im_list( void ) {
 }
 
 /*
- * taken from uim-svn3121/helper/toolbar-common-gtk.c
+ * taken from uim-1.4.2/helper/toolbar-common-gtk.c
  */
 static void helper_toolbar_parse_helper_str( GtkWidget *widget, gchar *str ) {
   gchar **lines;
@@ -614,8 +590,6 @@ static void helper_toolbar_parse_helper_str( GtkWidget *widget, gchar *str ) {
   if (lines && lines[0]) {
     if (!strcmp("prop_list_update", lines[0]))
       helper_toolbar_prop_list_update(widget, lines);
-    else if (!strcmp("prop_label_update", lines[0]))
-      helper_toolbar_prop_label_update(widget, lines);
     else if (!strcmp("custom_reload_notify", lines[0])) {
       uim_prop_reload_configs();
       helper_toolbar_check_custom();
@@ -676,7 +650,7 @@ static gboolean is_icon_registered( const gchar *name ) {
 }
 
 /*
- * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ * taken from uim-1.4.2/helper/toolbar-common-gtk.c
  */
 static gboolean register_icon( const gchar *name ) {
   GtkIconSet *icon_set;
@@ -701,7 +675,7 @@ static gboolean register_icon( const gchar *name ) {
   icon_set = gtk_icon_set_new_from_pixbuf(pixbuf);
   gtk_icon_factory_add(uim_factory, name, icon_set);
 
-  g_list_append(uim_icon_list, g_strdup(name));
+  uim_icon_list = g_list_append(uim_icon_list, g_strdup(name));
 
   g_string_free(filename, TRUE);
   gtk_icon_set_unref(icon_set);
@@ -711,7 +685,7 @@ static gboolean register_icon( const gchar *name ) {
 }
 
 /*
- * taken from uim-svn3105/helper/toolbar-common-gtk.c
+ * taken from uim-1.4.2/helper/toolbar-common-gtk.c
  */
 static void init_icon( void ) {
   if (uim_factory)
@@ -720,8 +694,9 @@ static void init_icon( void ) {
   uim_factory = gtk_icon_factory_new();
   gtk_icon_factory_add_default(uim_factory);
 
-  register_icon("switcher-icon");
+  register_icon("im_switcher");
   register_icon("uim-icon");
+  register_icon("uim-dict");
   register_icon("null");
 }
 

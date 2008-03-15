@@ -7,21 +7,21 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gkrelluim 0.0.6\n"
 "Report-Msgid-Bugs-To: d+gkrelluim@vdr.jp\n"
-"POT-Creation-Date: 2007-07-18 14:26+0900\n"
-"PO-Revision-Date: 2007-07-18 14:28+0900\n"
+"POT-Creation-Date: 2008-03-05 20:56+0900\n"
+"PO-Revision-Date: 2008-03-05 20:56+0900\n"
 "Last-Translator: dai <d+po@vdr.jp>\n"
 "Language-Team: ja <ja@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/gkrelluim.c:245
+#: src/gkrelluim.c:254
 #, c-format
 msgid ""
 "GKrellUIM %s\n"
 "GKrellM uim helper Plugin\n"
 "\n"
-"Copyright (C) 2004-2007 dai\n"
+"Copyright (C) 2004-2008 dai\n"
 "d+gkrelluim@vdr.jp\n"
 "http://vdr.jp/d/gkrelluim.html\n"
 "\n"
@@ -30,37 +30,37 @@ msgstr ""
 "GKrellUIM %s\n"
 "GKrellM uim ヘルパープラグイン\n"
 "\n"
-"Copyright (C) 2004-2007 dai\n"
+"Copyright (C) 2004-2008 dai\n"
 "d+gkrelluim@vdr.jp\n"
 "http://vdr.jp/d/gkrelluim.html\n"
 "\n"
 "GNU General Public License のもとにリリースされています\n"
 
-#: src/gkrelluim.c:253
+#: src/gkrelluim.c:262
 msgid "About"
 msgstr "GKrellUIM について"
 
-#: src/uim-helper.c:65
+#: src/uim-helper.c:66
 msgid "Switch input method"
 msgstr "入力方式の切り替え"
 
-#: src/uim-helper.c:74
+#: src/uim-helper.c:75
 msgid "Preference"
 msgstr "設定ツール"
 
-#: src/uim-helper.c:83
+#: src/uim-helper.c:84
 msgid "Japanese dictionary editor"
 msgstr "日本語辞書ツール"
 
-#: src/uim-helper.c:92
+#: src/uim-helper.c:93
 msgid "Input pad"
 msgstr "入力パッド"
 
-#: src/uim-helper.c:101
+#: src/uim-helper.c:102
 msgid "Handwriting input pad"
 msgstr "手書き入力パッド"
 
-#: src/uim-helper.c:110
+#: src/uim-helper.c:115
 msgid "Help"
 msgstr "ヘルプ"
 
