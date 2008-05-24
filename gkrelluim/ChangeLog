@@ -1,3 +1,10 @@
+2008-05-24 dai <d+gkrelluim@vdr.jp>
+
+	* Release 0.3.0
+	* src/uim-helper.h
+	  - include uim/uim-scm.h instead of uim/uim-compat-scm.h
+	  - see uim r4830
+
 2008-03-15 dai <d+gkrelluim@vdr.jp>
 
 	* Release 0.2.0

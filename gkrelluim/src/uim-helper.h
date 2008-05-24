@@ -54,7 +54,7 @@
 #include <ctype.h>
 #include <uim/uim.h>
 #include <uim/uim-helper.h>
-#include <uim/uim-compat-scm.h>
+#include <uim/uim-scm.h>
 
 enum {
   TYPE_IM=0,
