@@ -15,8 +15,9 @@ AC_CONFIG_HEADER(src/config.h)
 AC_PROG_CC
 
 # gettext
+AC_PROG_INTLTOOL([0.23])
 ALL_LINGUAS="ja"
-AM_GNU_GETTEXT
+AM_GLIB_GNU_GETTEXT
 LDFLAGS="$LDFLAGS $INTLLIBS"
 localedir='${prefix}/share/locale'
 AC_SUBST(localedir)
@@ -30,4 +31,4 @@ PKG_CHECK_MODULES(GKRELLM, gkrellm >= 2.3.0) # not 2.3.1
 AC_SUBST(GKRELLM_CFLAGS)
 AC_SUBST(GKRELLM_LIBS)
 
-AC_OUTPUT([Makefile src/Makefile intl/Makefile po/Makefile.in])
+AC_OUTPUT([Makefile src/Makefile po/Makefile.in])

@@ -1,3 +1,16 @@
+2010-07-14 dai <d+gkrelluim@vdr.jp>
+
+	* Release 0.3.1
+	* src/*.[ch]
+	  - updated the year part of the copyright notice
+	* mainly fix for Debian packaging
+	* Makefile.am, configure.ac
+	  - use glib-gettextize and intltool instead of gettextize
+	* intl/, m4/
+	  - removed
+	* po/gkrelluim.pot
+	  - included
+
 2008-05-24 dai <d+gkrelluim@vdr.jp>
 
 	* Release 0.3.0

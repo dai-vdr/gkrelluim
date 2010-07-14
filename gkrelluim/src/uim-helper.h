@@ -1,7 +1,7 @@
 /*
   GKrellUIM uim-helper
 
-  Copyright (C) 2004-2008 dai <d+gkrelluim@vdr.jp>
+  Copyright (C) 2004-2010 dai <d+gkrelluim@vdr.jp>
   All rights reserved.
 
   Original Author: uim Project http://code.google.com/p/uim/

@@ -1,5 +1,3 @@
-SUBDIRS= intl src po
+SUBDIRS= src po
 
-ACLOCAL_AMFLAGS = -I m4
-
-EXTRA_DIST = config.rpath mkinstalldirs
+EXTRA_DIST = mkinstalldirs
