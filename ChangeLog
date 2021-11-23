@@ -1,3 +1,12 @@
+2021-11-24 dai <d+gkrelluim@vdr.jp>
+
+	* Release 0.3.2
+	* update INSTALL.
+	* update year and URL.
+	* fix link order.
+	  - Thanks to Andreas Beckmann <anbe@debian.org>
+	* remove -Wl to build with GCC 4.7.
+
 2010-07-14 dai <d+gkrelluim@vdr.jp>
 
 	* Release 0.3.1
