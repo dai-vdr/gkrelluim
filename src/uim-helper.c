@@ -1,10 +1,10 @@
 /*
   GKrellUIM uim-helper
 
-  Copyright (C) 2004-2010 dai <d+gkrelluim@vdr.jp>
+  Copyright (C) 2004-2021 dai <d+gkrelluim@vdr.jp>
   All rights reserved.
 
-  Original Author: uim Project http://code.google.com/p/uim/
+  Original Author: uim Project https://github.com/uim/uim
   Modifier: dai <d+gkrelluim@vdr.jp>
 
   Redistribution and use in source and binary forms, with or

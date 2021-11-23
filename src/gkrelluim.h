@@ -1,7 +1,7 @@
 /*
   GKrellUIM: GKrellM uim helper Plugin
 
-  Copyright (C) 2004-2010 dai <d+gkrelluim@vdr.jp>
+  Copyright (C) 2004-2021 dai <d+gkrelluim@vdr.jp>
   All rights reserved.
 
   This program is free software; you can redistribute it and/or modify
